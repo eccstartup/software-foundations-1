@@ -231,19 +231,19 @@ Proof. reflexivity.  Qed.
     its inputs are [false]. *)
 
 Definition nandb (b1:bool) (b2:bool) : bool :=
-  (* FILL IN HERE *) admit.
+  negb (andb b1 b2).
 
 (** Remove "[Admitted.]" and fill in each proof with 
     "[Proof. reflexivity. Qed.]" *)
 
 Example test_nandb1:               (nandb true false) = true.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_nandb2:               (nandb false false) = true.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_nandb3:               (nandb false true) = true.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_nandb4:               (nandb true true) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 (** [] *)
 
 (** **** Exercise: 1 star (andb3) *)
@@ -252,16 +252,16 @@ Example test_nandb4:               (nandb true true) = false.
     otherwise. *)
 
 Definition andb3 (b1:bool) (b2:bool) (b3:bool) : bool :=
-  (* FILL IN HERE *) admit.
+  andb b1 (andb b2 b3).
 
 Example test_andb31:                 (andb3 true true true) = true.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_andb32:                 (andb3 false true true) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_andb33:                 (andb3 true false true) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 Example test_andb34:                 (andb3 true true false) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity. Qed.
 (** [] *)
 
 (* ###################################################################### *)
@@ -486,12 +486,15 @@ Fixpoint exp (base power : nat) : nat :=
     Translate this into Coq. *)
 
 Fixpoint factorial (n:nat) : nat := 
-(* FILL IN HERE *) admit.
+  match n with
+    | O => S O
+    | S x => mult n (factorial x)
+  end.
 
 Example test_factorial1:          (factorial 3) = 6.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity.  Qed.
 Example test_factorial2:          (factorial 5) = (mult 10 12).
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity.  Qed.
 (** [] *)
 
 (** We can make numerical expressions a little easier to read and
@@ -570,14 +573,14 @@ Proof. reflexivity.  Qed.
     simple, elegant solution for which [simpl] suffices. *)
 
 Definition blt_nat (n m : nat) : bool :=
-  (* FILL IN HERE *) admit.
+  andb (ble_nat n m) (negb (beq_nat n m)).
 
 Example test_blt_nat1:             (blt_nat 2 2) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity.  Qed.
 Example test_blt_nat2:             (blt_nat 2 4) = true.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity.  Qed.
 Example test_blt_nat3:             (blt_nat 4 2) = false.
-(* FILL IN HERE *) Admitted.
+Proof. reflexivity.  Qed.
 (** [] *)
 
 (* ###################################################################### *)
@@ -708,7 +711,9 @@ Proof.
 Theorem plus_id_exercise : forall n m o : nat,
   n = m -> m = o -> n + m = m + o.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m o H H0.
+  rewrite H. rewrite H0.
+  reflexivity. Qed.
 (** [] *)
 
 (** As we've seen in earlier examples, the [Admitted] command
@@ -738,7 +743,8 @@ Theorem mult_S_1 : forall n m : nat,
   m = S n -> 
   m * (1 + n) = m * m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m H.
+  rewrite H. simpl. reflexivity. Qed.
 (** [] *)
 
 
@@ -824,7 +830,9 @@ Proof.
 Theorem zero_nbeq_plus_1 : forall n : nat,
   beq_nat 0 (n + 1) = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n. destruct n as [| n'].
+    reflexivity.
+    reflexivity.  Qed.
 (** [] *)
 
 (* ###################################################################### *)
@@ -839,13 +847,19 @@ Theorem identity_fn_applied_twice :
   (forall (x : bool), f x = x) ->
   forall (b : bool), f (f b) = b.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros f H b. rewrite H. rewrite H. reflexivity.  Qed.
 
 (** Now state and prove a theorem [negation_fn_applied_twice] similar
     to the previous one but where the second hypothesis says that the
     function [f] has the property that [f x = negb x].*)
 
-(* FILL IN HERE *)
+Theorem negation_fn_applied_twice :
+  forall (f : bool -> bool),
+  (forall (x : bool), f x = negb x) ->
+  forall (b : bool), f (f b) = b.
+Proof.
+  intros f H b. rewrite H. rewrite H.
+  rewrite negb_involutive. reflexivity.  Qed.
 
 (** **** Exercise: 2 stars (andb_eq_orb) *)
 (** Prove the following theorem.  (You may want to first prove a
@@ -857,7 +871,9 @@ Theorem andb_eq_orb :
   (andb b c = orb b c) ->
   b = c.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros b c. destruct b.
+    simpl. intros H. rewrite H. reflexivity.
+    simpl. intros H. rewrite H. reflexivity.  Qed.
 
 (** **** Exercise: 3 stars (binary) *)
 (** Consider a different, more efficient representation of natural
@@ -894,7 +910,59 @@ Proof.
         converting it to unary and then incrementing. 
 *)
 
-(* FILL IN HERE *)
+Inductive bin : Type :=
+  | Zero  : bin
+  | Twice : bin -> bin
+  | More  : bin -> bin.
+
+Fixpoint binc (n : bin) : bin :=
+  match n with
+    | Zero    => More Zero
+    | Twice x => More x
+    | More x  => Twice (binc x)
+  end.
+
+Fixpoint binn (n : bin) : nat :=
+  match n with
+    | Zero    => O
+    | Twice x => binn x + binn x
+    | More x  => S (binn x + binn x)
+  end.
+
+Example test_bin0: binc Zero = More Zero.                       (* 1: 0001 *)
+Proof. simpl. reflexivity.  Qed.
+Example test_bin1: binc (More Zero) = Twice (More Zero).        (* 2: 0010 *)
+Proof. simpl. reflexivity.  Qed.
+Example test_bin2: binc (Twice (More Zero)) = More (More Zero). (* 3: 0011 *)
+Proof. simpl. reflexivity.  Qed.
+Example test_bin3: binc (More (More Zero)) =                    (* 4: 0100 *)
+                   Twice (Twice (More Zero)).
+Proof. simpl. reflexivity.  Qed.
+Example test_bin4: binc (Twice (Twice (More Zero))) =           (* 5: 0101 *)
+                   More (Twice (More Zero)).
+Proof. simpl. reflexivity.  Qed.
+Example test_bin5: binc (More (Twice (More Zero))) =            (* 6: 0110 *)
+                   Twice (More (More Zero)).
+Proof. simpl. reflexivity.  Qed.
+Example test_bin6: binc (Twice (More (More Zero))) =            (* 7: 0111 *)
+                   More (More (More Zero)).
+Proof. simpl. reflexivity.  Qed.
+Example test_bin7: binc (More (More (More Zero))) =             (* 8: 1000 *)
+                   Twice (Twice (Twice (More Zero))).
+Proof. simpl. reflexivity.  Qed.
+
+Example test_binn1: binn (binc Zero) = S (binn Zero).
+Proof. simpl. reflexivity.  Qed.
+Example test_binn2: binn (binc (More Zero)) = S (binn (More Zero)).
+Proof. simpl. reflexivity.  Qed.
+Example test_binn3: binn (binc (Twice (More Zero))) = S (binn (Twice (More Zero))).
+Proof. simpl. reflexivity.  Qed.
+Example test_binn4: binn (binc (More (More Zero))) = S (binn (More (More Zero))).
+Proof. simpl. reflexivity.  Qed.
+Example test_binn5: binn (binc (Twice (Twice (More Zero)))) =
+                    S (binn (Twice (Twice (More Zero)))).
+Proof. simpl. reflexivity.  Qed.
+
 (** [] *)
 
 (* ###################################################################### *)
@@ -960,8 +1028,11 @@ Fixpoint plus' (n : nat) (m : nat) : nat :=
     _does_ terminate on all inputs, but that Coq will _not_ accept
     because of this restriction. *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* Fixpoint nearest_odd (n : nat) : nat := *)
+(*   match n with *)
+(*     | O => nearest_odd (S n) *)
+(*     | S n' => S n' *)
+(*   end. *)
 
 (* $Date: 2013-12-03 07:45:41 -0500 (Tue, 03 Dec 2013) $ *)
 
