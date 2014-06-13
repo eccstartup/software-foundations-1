@@ -1129,3 +1129,76 @@ Proof.
 
 (* $Date: 2013-09-26 14:40:26 -0400 (Thu, 26 Sep 2013) $ *)
 
+
+Inductive Yoneda (F : Type -> Type) (X : Type) : Type :=
+  | Embed : (forall {Y}, (X -> Y) -> F Y) -> Yoneda F X.
+
+Theorem eq_remove_Embed : forall (F : Type -> Type) (X : Type)
+  (n m : forall Y : Type, (X -> Y) -> F Y),
+    n = m -> Embed F X n = Embed F X m.
+Proof.
+  intros. inversion H. reflexivity.  Qed.
+
+Definition is_iso (X Y : Type) (x : X) (y : Y)
+  (to : X -> Y) (from : Y -> X) : Prop :=
+  from (to x) = x -> to (from y) = y.
+
+Definition id {X : Type} (a : X) : X := a.
+
+Definition compose {A B C : Type}
+  (f : B -> C) (g : A -> B) (x : A) : C := f (g x).
+
+Notation "f ∘ g" := (compose f g) (at level 60, right associativity).
+
+Class Isomorphic (X Y : Type) := {
+  cast_to : X -> Y;
+  cast_from : Y -> X;
+  iso_to : forall (x : X), cast_from (cast_to x) = x;
+  iso_from : forall (y : Y), cast_to (cast_from y) = y
+}.
+
+Notation "X ≅ Y" := (Isomorphic X Y) (at level 50) : type_scope.
+
+Class Functor (F : Type -> Type) := {
+  fmap : forall {X Y}, (X -> Y) -> F X -> F Y;
+  functor_law_1 : forall {X} (x : F X), fmap (@id X) x = @id (F X) x;
+  functor_law_2 : forall {X Y Z} (x : F X) (f : Y -> Z) (g : X -> Y),
+   (fmap f ∘ fmap g) x = fmap (f ∘ g) x
+}.
+
+Global Instance List_Functor : Functor list := {
+  fmap X Y := map
+}.
+Proof.
+  (* functor_law_1 *)
+  intros. induction x as [| x'].
+  Case "x = nil". reflexivity.
+  Case "x = cons". simpl. rewrite IHx. reflexivity.
+
+  (* functor_law_2 *)
+  intros. induction x as [| x'].
+  Case "x = nil". reflexivity.
+  Case "x = cons".
+    unfold compose. unfold compose in IHx.
+    simpl. rewrite IHx. reflexivity.  Qed.
+
+Definition lift_yoneda (F : Type -> Type) (f_dict : Functor F)
+  (X : Type) (a : F X) : Yoneda F X := Embed F X (fun _ f => fmap f a).
+
+Definition lower_yoneda (F : Type -> Type) (X : Type) (a : Yoneda F X) : F X :=
+  match a with | Embed x => x X id end.
+
+Theorem yoneda_lemma : forall (F : Type -> Type) (f_dict : Functor F)
+  (X : Type) (o : F X) (p : Yoneda F X),
+    is_iso (F X) (Yoneda F X) o p (lift_yoneda F f_dict X) (lower_yoneda F X).
+Proof.
+  intros.
+  unfold is_iso.
+  unfold lower_yoneda.
+  destruct (lift_yoneda F f_dict X o).
+  intros.
+  destruct p.
+  destruct (lift_yoneda F f_dict X (f0 X id)).
+  apply eq_remove_Embed.
+  (* jww (2014-06-13): What to do here? *)
+  admit.  Qed.
