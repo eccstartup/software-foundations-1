@@ -201,14 +201,16 @@ Theorem proj1 : forall P Q : Prop,
   P /\ Q -> P.
 Proof.
   intros P Q H.
-  inversion H as [HP HQ]. 
+  inversion H as [HP HQ].
   apply HP.  Qed.
 
 (** **** Exercise: 1 star, optional (proj2) *)
 Theorem proj2 : forall P Q : Prop, 
   P /\ Q -> Q.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  inversion H.
+  apply H1.  Qed.
 (** [] *)
 
 Theorem and_commut : forall P Q : Prop, 
@@ -220,7 +222,6 @@ Proof.
   split.  
     Case "left". apply HQ. 
     Case "right". apply HP.  Qed.
-  
 
 (** **** Exercise: 2 stars (and_assoc) *)
 (** In the following proof, notice how the _nested pattern_ in the
@@ -232,7 +233,8 @@ Theorem and_assoc : forall P Q R : Prop,
 Proof.
   intros P Q R H.
   inversion H as [HP [HQ HR]].
-(* FILL IN HERE *) Admitted.
+  split.
+    split. apply HP. apply HQ. apply HR.  Qed.
 (** [] *)
 
 

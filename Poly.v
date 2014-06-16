@@ -1130,44 +1130,32 @@ Proof.
 (* $Date: 2013-09-26 14:40:26 -0400 (Thu, 26 Sep 2013) $ *)
 
 
-Inductive Yoneda (F : Type -> Type) (X : Type) : Type :=
-  | Embed : (forall {Y}, (X -> Y) -> F Y) -> Yoneda F X.
+Definition id {X} (a : X) : X := a.
 
-Theorem eq_remove_Embed : forall (F : Type -> Type) (X : Type)
-  (n m : forall Y : Type, (X -> Y) -> F Y),
-    n = m -> Embed F X n = Embed F X m.
-Proof.
-  intros. inversion H. reflexivity.  Qed.
-
-Definition is_iso (X Y : Type) (x : X) (y : Y)
-  (to : X -> Y) (from : Y -> X) : Prop :=
-  from (to x) = x -> to (from y) = y.
-
-Definition id {X : Type} (a : X) : X := a.
-
-Definition compose {A B C : Type}
+Definition compose {A B C}
   (f : B -> C) (g : A -> B) (x : A) : C := f (g x).
 
 Notation "f ∘ g" := (compose f g) (at level 60, right associativity).
 
-Class Isomorphic (X Y : Type) := {
-  cast_to : X -> Y;
-  cast_from : Y -> X;
-  iso_to : forall (x : X), cast_from (cast_to x) = x;
-  iso_from : forall (y : Y), cast_to (cast_from y) = y
-}.
+Theorem comp_left_identity : forall {X Y} (f : X -> Y),
+  id ∘ f = f.
+Proof.
+  intros. reflexivity.  Qed.
 
-Notation "X ≅ Y" := (Isomorphic X Y) (at level 50) : type_scope.
+Theorem comp_right_identity : forall {X Y} (f : X -> Y),
+  f ∘ id = f.
+Proof.
+  intros. reflexivity.  Qed.
 
 Class Functor (F : Type -> Type) := {
   fmap : forall {X Y}, (X -> Y) -> F X -> F Y;
   functor_law_1 : forall {X} (x : F X), fmap (@id X) x = @id (F X) x;
   functor_law_2 : forall {X Y Z} (x : F X) (f : Y -> Z) (g : X -> Y),
-   (fmap f ∘ fmap g) x = fmap (f ∘ g) x
+    (fmap f ∘ fmap g) x = fmap (f ∘ g) x
 }.
 
 Global Instance List_Functor : Functor list := {
-  fmap X Y := map
+  fmap := @map
 }.
 Proof.
   (* functor_law_1 *)
@@ -1182,23 +1170,75 @@ Proof.
     unfold compose. unfold compose in IHx.
     simpl. rewrite IHx. reflexivity.  Qed.
 
-Definition lift_yoneda (F : Type -> Type) (f_dict : Functor F)
-  (X : Type) (a : F X) : Yoneda F X := Embed F X (fun _ f => fmap f a).
+Inductive Yoneda (F : Type -> Type) X : Type :=
+  | Embed : forall {Y}, F Y -> (Y -> X) -> Yoneda F X.
 
-Definition lower_yoneda (F : Type -> Type) (X : Type) (a : Yoneda F X) : F X :=
-  match a with | Embed x => x X id end.
+Definition lift_yoneda (F : Type -> Type) X (a : F X)
+  : Yoneda F X := Embed F X a id.
 
-Theorem yoneda_lemma : forall (F : Type -> Type) (f_dict : Functor F)
-  (X : Type) (o : F X) (p : Yoneda F X),
-    is_iso (F X) (Yoneda F X) o p (lift_yoneda F f_dict X) (lower_yoneda F X).
+Definition lower_yoneda (F : Type -> Type) (f_dict : Functor F)
+  X (a : Yoneda F X) : F X :=
+  match a with | Embed F x f => fmap f x end.
+
+Theorem eq_remove_Embed : forall (F : Type -> Type) X Y (f : Y -> X) (n m : F Y),
+    n = m -> Embed F X n f = Embed F X m f.
 Proof.
-  intros.
-  unfold is_iso.
-  unfold lower_yoneda.
-  destruct (lift_yoneda F f_dict X o).
-  intros.
-  destruct p.
-  destruct (lift_yoneda F f_dict X (f0 X id)).
-  apply eq_remove_Embed.
-  (* jww (2014-06-13): What to do here? *)
-  admit.  Qed.
+  intros. inversion H. reflexivity.  Qed.
+
+Definition yoneda_map {F : Type -> Type} {X Y}
+  (f : X -> Y) (x : Yoneda F X) : Yoneda F Y :=
+  match x with
+    | Embed X y g => Embed F Y y (f ∘ g)
+  end.
+
+Global Instance Yoneda_Functor (F : Type -> Type) : Functor (Yoneda F) := {
+  fmap := @yoneda_map F
+}.
+Proof.
+  (* functor_law_1 *)
+  intros. unfold yoneda_map. destruct x.
+    rewrite comp_left_identity. reflexivity.
+
+  (* functor_law_2 *)
+  intros. compute. destruct x. reflexivity.  Qed.
+
+Class Isomorphism X Y := {
+  to : X -> Y; from : Y -> X;
+  iso_to    : forall (x : X), from (to x) = x;
+  iso_from  : forall (y : Y), to (from y) = y
+}.
+
+Notation "X ≅ Y" := (Isomorphism X Y) (at level 50) : type_scope.
+
+Hypothesis yoneda_refl : forall (F : Type -> Type) (f_dict : Functor F)
+  X Y (f : Y -> X) (x : F Y),
+  Embed F X (fmap f x) id = Embed F X x f.
+
+Global Instance Yoneda_Lemma (F : Type -> Type) (f_dict : Functor F) X
+  : F X ≅ Yoneda F X := {
+  to   := lift_yoneda F X;
+  from := lower_yoneda F f_dict X
+}.
+Proof.
+  intros. compute. apply functor_law_1.
+
+  intros. unfold lower_yoneda. destruct y. unfold lift_yoneda.
+    apply yoneda_refl.  Qed.
+
+Inductive Source (M : Type -> Type) X : Type :=
+  | ASource : (forall {R}, R -> (R -> X -> M R) -> M R) -> Source M X.
+
+Definition source_map {M : Type -> Type} {X Y}
+  (f : X -> Y) (x : Source M X) : Source M Y :=
+  match x with
+    | ASource await =>
+        ASource M Y (fun R z yield => await R z (fun r y => yield r (f y)))
+  end.
+
+Global Instance Source_Functor (M : Type -> Type) (X : Type)
+  : Functor (Source M) := {
+  fmap := @source_map M
+}.
+Proof.
+  intros. compute. destruct x. reflexivity.
+  intros. compute. destruct x. reflexivity.  Qed.
