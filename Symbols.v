@@ -24,4 +24,3 @@
 (** printing Gamma' #<span style="font-family: serif; font-size:85%;">&Gamma;'</span># *)
 (** printing Gamma'' #<span style="font-family: serif; font-size:85%;">&Gamma;''</span># *)
 (** printing |-> #<span style="font-family: arial;">&#8614;</span># *)
-
