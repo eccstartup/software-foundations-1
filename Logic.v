@@ -414,7 +414,15 @@ Qed.
 Theorem or_distributes_over_and : forall P Q R : Prop,
   P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. split.
+    intros. split.
+      inversion H. left. assumption.
+      inversion H0. right. assumption.
+      inversion H. left. assumption.
+      inversion H0. right. assumption.
+    intros.
+      apply truth in H. assumption.
+Qed.
 (** [] *)
 
 (* ################################################### *)
@@ -452,19 +460,38 @@ Proof.
 Theorem andb_false : forall b c,
   andb b c = false -> b = false \/ c = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. destruct b. destruct c.
+    inversion H. right. reflexivity.
+    left. reflexivity.
+Qed.
 
 Theorem orb_prop : forall b c,
   orb b c = true -> b = true \/ c = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. destruct b.
+  destruct c.
+    left. reflexivity.
+    left. reflexivity.
+  destruct c.
+    right. reflexivity.
+    inversion H.
+Qed.
 
 Theorem orb_false_elim : forall b c,
   orb b c = false -> b = false /\ c = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
-
+  intros. destruct b.
+    destruct c.
+      inversion H.
+      split.
+        inversion H.
+        reflexivity.
+    destruct c.
+      split.
+        reflexivity.
+        inversion H.
+      split; reflexivity.
+Qed.
 
 
 (* ################################################### *)
@@ -532,7 +559,7 @@ Proof.
     intution is that [True] should be a proposition for which it is
     trivial to give evidence.) *)
 
-(* FILL IN HERE *)
+Inductive True : Prop := tt.
 (** [] *)
 
 (** However, unlike [False], which we'll use extensively, [True] is
@@ -598,15 +625,17 @@ Proof.
 Theorem contrapositive : forall P Q : Prop,
   (P -> Q) -> (~Q -> ~P).
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros. unfold not. unfold not in H0.
+  intros. apply H0. apply H. apply H1.
+Qed.
 
 (** **** Exercise: 1 star (not_both_true_and_false) *)
 Theorem not_both_true_and_false : forall P : Prop,
   ~ (P /\ ~P).
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros. unfold not. intros.
+  inversion H. apply H1. apply H0.
+Qed.
 
 (** **** Exercise: 1 star, advanced (informal_not_PNP) *)
 (** Write an informal proof (in English) of the proposition [forall P
@@ -650,7 +679,39 @@ Definition de_morgan_not_and_not := forall P Q:Prop,
 Definition implies_to_or := forall P Q:Prop,
   (P->Q) -> (~P\/Q).
 
-(* FILL IN HERE *)
+Theorem peirce_classic : peirce -> classic.
+Proof.
+  compute. intros.
+  specialize (H P False). apply H. intros.
+    apply H. contradiction H0.
+Qed.
+
+Theorem classic_excluded_middle : classic -> excluded_middle.
+Proof.
+  compute. intros.
+Abort.
+
+Theorem em_de_morgan : excluded_middle -> de_morgan_not_and_not.
+Proof.
+  intros. compute. compute in H.
+  intros. specialize (H P).
+  inversion H. left. apply H1.
+  left.
+Abort.
+
+Theorem de_morgan_to_or : de_morgan_not_and_not -> implies_to_or.
+Proof.
+  compute. intros.
+  specialize (H P Q).
+  right. apply H0.
+Abort.
+
+Theorem to_or_peirce: implies_to_or -> peirce.
+Proof.
+  compute. intros.
+  specialize (H P Q).
+  apply H0. intros.
+Abort.
 (** [] *)
 
 (** **** Exercise: 3 stars (excluded_middle_irrefutable) *)
@@ -661,7 +722,9 @@ we would have both [~ (P \/ ~P)] and [~ ~ (P \/ ~P)], a contradiction. *)
 
 Theorem excluded_middle_irrefutable:  forall (P:Prop), ~ ~ (P \/ ~ P).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. unfold not. intros.
+  apply H. right. intros. apply H. left. apply H0.
+Qed.
 
 
 (* ########################################################## *)
@@ -706,14 +769,27 @@ Theorem false_beq_nat : forall n m : nat,
      n <> m ->
      beq_nat n m = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n. induction n; simpl; intros; destruct m.
+    contradiction H. reflexivity.
+    reflexivity.
+    reflexivity.
+    apply IHn. unfold not in *. auto.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (beq_nat_false) *)
 Theorem beq_nat_false : forall n m,
   beq_nat n m = false -> n <> m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros n m.
+  generalize dependent m.
+  unfold not.
+  induction n; destruct m; intros.
+    inversion H.
+    inversion H0.
+    inversion H0.
+    specialize (IHn m). auto.
+Qed.
 (** [] *)
 
 
