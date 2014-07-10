@@ -134,9 +134,18 @@ Qed.
 (** Here's another exercise requiring induction. *)
 
 Theorem ev_sum : forall n m,
-   ev n -> ev m -> ev (n+m).
+  ev n -> ev m -> ev (n+m).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  generalize dependent m.
+  induction H. auto.
+  intros.
+  rewrite plus_comm.
+  rewrite <- plus_n_Sm.
+  rewrite <- plus_n_Sm.
+  rewrite plus_comm.
+  apply ev_SS. auto.
+Qed.
 (** [] *)
 
 
@@ -277,13 +286,30 @@ Qed.
 (** **** Exercise: 2 stars (b_times2) *)
 Theorem b_times2: forall n, beautiful n -> beautiful (2*n).
 Proof.
-    (* FILL IN HERE *) Admitted.
+  intros. induction H.
+  rewrite mult_0_r. constructor.
+  apply b_sum with (n:=3) (m:=3); constructor.
+  apply b_sum with (n:=5) (m:=5); constructor.
+  rewrite mult_comm.
+  rewrite mult_plus_distr_r.
+  apply b_sum with (n:=(n * 2)) (m:=(m * 2)).
+  rewrite mult_comm. apply IHbeautiful1.
+  rewrite mult_comm. apply IHbeautiful2.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars (b_timesm) *)
 Theorem b_timesm: forall n m, beautiful n -> beautiful (m*n).
 Proof.
-   (* FILL IN HERE *) Admitted.
+  intros.
+  generalize dependent n.
+  induction n.
+  intros. rewrite mult_0_r. constructor.
+  induction m.
+  rewrite mult_0_l. constructor.
+  intros.
+  (* FILL IN HERE *)
+Abort.
 (** [] *)
 
 
