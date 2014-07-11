@@ -302,14 +302,19 @@ Qed.
 Theorem b_timesm: forall n m, beautiful n -> beautiful (m*n).
 Proof.
   intros.
-  generalize dependent n.
+  generalize dependent m.
   induction n.
-  intros. rewrite mult_0_r. constructor.
+    intros. rewrite mult_0_r. constructor.
   induction m.
-  rewrite mult_0_l. constructor.
+    rewrite mult_0_l. constructor.
   intros.
-  (* FILL IN HERE *)
-Abort.
+  rewrite mult_comm.
+  rewrite mult_plus.
+  rewrite mult_comm.
+  apply b_sum.
+  apply H.
+  apply IHm.
+Qed.
 (** [] *)
 
 
@@ -417,13 +422,29 @@ Abort.
 Theorem gorgeous_sum : forall n m,
   gorgeous n -> gorgeous m -> gorgeous (n + m).
 Proof.
- (* FILL IN HERE *) Admitted.
+  intros n m H.
+  induction H; intros; simpl.
+  apply H.
+  induction H0; apply g_plus3; apply IHgorgeous.
+    apply g_0. apply g_plus3. apply H0.
+    apply g_plus5. apply H0.
+  apply g_plus5. apply IHgorgeous. apply H0.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, advanced (beautiful__gorgeous) *)
 Theorem beautiful__gorgeous : forall n, beautiful n -> gorgeous n.
 Proof.
- (* FILL IN HERE *) Admitted.
+  intros. induction H.
+  apply g_0.
+  apply g_plus3.
+  apply g_0.
+  apply g_plus5.
+  apply g_0.
+  apply gorgeous_sum.
+  assumption.
+  assumption.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, optional (g_times2) *)
@@ -432,13 +453,21 @@ Proof.
 
 Lemma helper_g_times2 : forall x y z, x + (z + y)= z + x + y.
 Proof.
-   (* FILL IN HERE *) Admitted.
+  intros. rewrite plus_assoc. rewrite (plus_comm x z). reflexivity.
+Qed.
 
 Theorem g_times2: forall n, gorgeous n -> gorgeous (2*n).
 Proof.
    intros n H. simpl.
-   induction H.
-   (* FILL IN HERE *) Admitted.
+   induction H; simpl.
+   apply g_0.
+   apply g_plus3.
+   apply gorgeous_sum. apply H.
+   apply g_plus3. rewrite plus_0_r. apply H.
+   apply g_plus5.
+   apply gorgeous_sum. apply H.
+   apply g_plus5. rewrite plus_0_r. apply H.
+Qed.
 (** [] *)
 
 
@@ -515,7 +544,8 @@ Proof.
 Theorem SSSSev__even : forall n,
   ev (S (S (S (S n)))) -> ev n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. inversion H. inversion H1. apply H3.
+Qed.
 
 (** The [inversion] tactic can also be used to derive goals by showing
     the absurdity of a hypothesis. *)
@@ -523,7 +553,8 @@ Proof.
 Theorem even5_nonsense :
   ev 5 -> 2 + 2 = 9.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. simpl. inversion H. inversion H1. inversion H3.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, advanced (ev_ev__ev) *)
@@ -533,7 +564,12 @@ Proof.
 Theorem ev_ev__ev : forall n m,
   ev (n+m) -> ev n -> ev m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction H0. simpl in H. auto.
+  apply IHev.
+  repeat (rewrite plus_Sn_m in H).
+  inversion H. auto.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, optional (ev_plus_plus) *)
@@ -544,7 +580,10 @@ Proof.
 Theorem ev_plus_plus : forall n m p,
   ev (n+m) -> ev (n+p) -> ev (m+p).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  apply ev_sum.
+  (* FILL IN HERE *)
+Abort.
 (** [] *)
 
 
