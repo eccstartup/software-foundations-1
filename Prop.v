@@ -735,7 +735,7 @@ Proof.
   intros.
   induction l. constructor.
   (* FILL IN HERE *)
-Admitted.
+Abort.
 
 Definition lt (n m:nat) := le (S n) m.
 
@@ -1143,7 +1143,6 @@ Example true_upto_n_example :
     (true_upto_n__true_everywhere 3 (fun n => even n))
   = (even 3 -> even 2 -> even 1 -> forall m : nat, even m).
 Proof. reflexivity.  Qed.
-*)
 (** [] *)
 
 

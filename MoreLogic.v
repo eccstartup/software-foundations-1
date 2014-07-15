@@ -110,7 +110,10 @@ Qed.
 Theorem dist_not_exists : forall (X:Type) (P : X -> Prop),
   (forall x, P x) -> ~ (exists x, ~ P x).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. unfold not.
+  intros. destruct H0.
+  apply H0. auto.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, optional (not_exists_dist) *)
@@ -122,7 +125,13 @@ Theorem not_exists_dist :
   forall (X:Type) (P : X -> Prop),
     ~ (exists x, ~ P x) -> (forall x, P x).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold excluded_middle in H.
+  specialize (H (P x)).
+  inversion H. assumption.
+  contradiction H0.
+  exists x. assumption.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars (dist_exists_or) *)
@@ -132,7 +141,17 @@ Proof.
 Theorem dist_exists_or : forall (X:Type) (P Q : X -> Prop),
   (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
 Proof.
-   (* FILL IN HERE *) Admitted.
+  intros. split; intros.
+  inversion H. inversion H0.
+  left. exists witness. assumption.
+  right. exists witness. assumption.
+  inversion H. inversion H0.
+  exists witness. left. assumption.
+  destruct H. destruct H.
+  exists witness. left. assumption.
+  destruct H0. exists witness.
+  right. assumption.
+Qed.
 (** [] *)
 
 (* ###################################################### *)
@@ -238,7 +257,9 @@ Proof.
 Theorem override_shadow' : forall (X:Type) x1 x2 k1 k2 (f : nat->X),
   (override' (override' f k1 x2) k1 x1) k2 = (override' f k1 x1) k2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. unfold override'.
+  destruct (eq_nat_dec k1 k2); auto.
+Qed.
 (** [] *)
 
 
@@ -255,8 +276,8 @@ Proof.
     asserts that [P] is true for every element of the list [l]. *)
 
 Inductive all (X : Type) (P : X -> Prop) : list X -> Prop :=
-  (* FILL IN HERE *)
-.
+  | vacuous : all X P []
+  | holds x xs : P x -> all X P xs -> all X P (x :: xs).
 
 (** Recall the function [forallb], from the exercise
     [forall_exists_challenge] in chapter [Poly]: *)
@@ -274,7 +295,20 @@ Fixpoint forallb {X : Type} (test : X -> bool) (l : list X) : bool :=
     Are there any important properties of the function [forallb] which
     are not captured by your specification? *)
 
-(* FILL IN HERE *)
+Theorem forallb_holds : forall X (test : X -> bool) (xs : list X),
+  forallb test xs = true <-> all X (fun x => test x = true) xs.
+Proof.
+  intros. split.
+  - intros. induction xs. constructor.
+    apply holds. simpl in H.
+      destruct (test x). reflexivity. apply H.
+    apply IHxs. simpl in H.
+    apply andb_true_elim2 in H.
+    assumption.
+  - intros. induction H. auto.
+    simpl. rewrite IHall.
+    rewrite H. auto.
+Qed.
 (** [] *)
 
 (** **** Exercise: 4 stars, advanced (filter_challenge) *)
@@ -327,15 +361,38 @@ Inductive appears_in {X:Type} (a:X) : list X -> Prop :=
     Here's a pair of warm-ups about [appears_in].
 *)
 
+(* Lemma appears_in_cons : forall (X:Type) (xs ys : list X) (x:X), *)
+(*   appears_in x (x :: xs) -> appears_in x xs \/ appears_in x ys. *)
+(* Proof. *)
+
 Lemma appears_in_app : forall (X:Type) (xs ys : list X) (x:X),
-     appears_in x (xs ++ ys) -> appears_in x xs \/ appears_in x ys.
-Proof.
-  (* FILL IN HERE *) Admitted.
+  appears_in x (xs ++ ys) -> appears_in x xs \/ appears_in x ys.
+Proof with auto.
+  intros. generalize dependent ys.
+  induction xs.
+    right. simpl in H...
+  intros. inversion H. subst.
+  - destruct ys eqn:Heqe.
+      rewrite app_nil in H...
+      left. constructor.
+    constructor. constructor.
+  - destruct ys eqn:Heqe.
+      left. rewrite app_nil in H...
+    specialize (IHxs (x1 :: l0)).
+    apply IHxs in H1. inversion H1.
+    constructor. constructor...
+    right...
+Qed.
 
 Lemma app_appears_in : forall (X:Type) (xs ys : list X) (x:X),
-     appears_in x xs \/ appears_in x ys -> appears_in x (xs ++ ys).
+  appears_in x xs \/ appears_in x ys -> appears_in x (xs ++ ys).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  inversion H.
+  - induction H0; simpl.
+      constructor.
+    
+  - 
 
 (** Now use [appears_in] to define a proposition [disjoint X l1 l2],
     which should be provable exactly when [l1] and [l2] are
