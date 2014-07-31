@@ -368,7 +368,8 @@ Inductive appears_in {X:Type} (a:X) : list X -> Prop :=
 Lemma appears_in_app : forall (X:Type) (xs ys : list X) (x:X),
   appears_in x (xs ++ ys) -> appears_in x xs \/ appears_in x ys.
 Proof with auto.
-  intros. generalize dependent ys.
+  intros.
+  generalize dependent ys.
   induction xs.
     right. simpl in H...
   intros. inversion H. subst.
@@ -384,21 +385,73 @@ Proof with auto.
     right...
 Qed.
 
+Theorem appears_cons : forall (X : Type) x y (xs : list X),
+  appears_in x (y :: xs) -> x = y \/ appears_in x xs.
+Proof.
+  intros.
+  inversion H; subst.
+    left. reflexivity.
+  right. assumption.
+Qed.
+
+Theorem appears_before_cons : forall (X : Type) x y (xs : list X),
+  appears_in x (y :: xs) -> x <> y -> appears_in x xs.
+Proof.
+  intros.
+  rewrite app_cons in H.
+  apply appears_in_app in H.
+  intuition.
+  inversion H1; subst.
+    contradiction H0.
+    reflexivity.
+  inversion H2.
+Qed.
+
+Theorem appears_cons_flip : forall (X : Type) x y z (xs : list X),
+   appears_in x (y :: z :: xs) -> appears_in x (z :: y :: xs).
+Proof.
+  intros.
+  inversion H; subst.
+    constructor.
+    constructor.
+  inversion H1; subst.
+    constructor.
+  constructor.
+  constructor.
+  assumption.
+Qed.
+
 Lemma app_appears_in : forall (X:Type) (xs ys : list X) (x:X),
   appears_in x xs \/ appears_in x ys -> appears_in x (xs ++ ys).
 Proof.
   intros.
-  inversion H.
-  - induction H0; simpl.
+  destruct H.
+    induction xs.
+      inversion H.
+    inversion H; simpl; subst.
       constructor.
-    
-  - 
+      constructor. auto.
+  induction xs; simpl.
+    assumption.
+  constructor. auto.
+Qed.
 
 (** Now use [appears_in] to define a proposition [disjoint X l1 l2],
     which should be provable exactly when [l1] and [l2] are
     lists (with elements of type X) that have no elements in common. *)
 
-(* FILL IN HERE *)
+Theorem disjoint : forall X x (l : list X),
+  appears_in x l -> exists l1, exists l2, l = l1 ++ x :: l2.
+Proof.
+  intros.
+  induction H.
+  exists nil.
+  exists l. auto.
+  destruct IHappears_in as [x0].
+  destruct H0 as [x1].
+  exists (b :: x0).
+  exists x1. subst. reflexivity.
+Qed.
 
 (** Next, use [appears_in] to define an inductive proposition
     [no_repeats X l], which should be provable exactly when [l] is a
