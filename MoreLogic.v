@@ -440,18 +440,52 @@ Qed.
     which should be provable exactly when [l1] and [l2] are
     lists (with elements of type X) that have no elements in common. *)
 
-Theorem disjoint : forall X x (l : list X),
-  appears_in x l -> exists l1, exists l2, l = l1 ++ x :: l2.
+Definition disjoint {X : Type} (l1 l2 : list X) : Prop :=
+  forall x, appears_in x l1 -> not (appears_in x l2).
+
+Example ex_disjoint_1 : disjoint [1; 2; 3] [4; 5; 6].
 Proof.
+  unfold disjoint.
   intros.
-  induction H.
-  exists nil.
-  exists l. auto.
-  destruct IHappears_in as [x0].
-  destruct H0 as [x1].
-  exists (b :: x0).
-  exists x1. subst. reflexivity.
+  unfold not.
+  intros.
+  inversion H; subst.
+    inversion H0; subst.
+    inversion H2; subst.
+    inversion H3; subst.
+    inversion H4.
+  inversion H2; subst.
+    inversion H0; subst.
+    inversion H3; subst.
+    inversion H4; subst.
+    inversion H5.
+  inversion H3; subst.
+    inversion H0; subst.
+    inversion H4; subst.
+    inversion H5; subst.
+    inversion H6.
+  inversion H4.
 Qed.
+
+Example ex_disjoint_2 : disjoint [1; 2; 3] [3; 4; 5].
+Proof.
+  unfold disjoint.
+  intros.
+  unfold not.
+  intros.
+  inversion H; subst.
+    inversion H0; subst.
+    inversion H2; subst.
+    inversion H3; subst.
+    inversion H4.
+  inversion H2; subst.
+    inversion H0; subst.
+    inversion H3; subst.
+    inversion H4; subst.
+    inversion H5.
+  inversion H3; subst.
+    inversion H0; subst.
+Abort.
 
 (** Next, use [appears_in] to define an inductive proposition
     [no_repeats X l], which should be provable exactly when [l] is a
@@ -460,12 +494,90 @@ Qed.
     [no_repeats bool []] should be provable, while [no_repeats nat
     [1,2,1]] and [no_repeats bool [true,true]] should not be.  *)
 
-(* FILL IN HERE *)
+Inductive no_repeats {X : Type} : list X -> Prop :=
+  | no_repeats_nil : no_repeats []
+  | no_repeats_cons x l : no_repeats l -> not (appears_in x l) -> no_repeats (x :: l).
+
+Example no_repeats_nat1 : no_repeats [1; 2; 3; 4].
+Proof.
+  constructor.
+  constructor.
+  constructor.
+  constructor.
+  constructor.
+  unfold not. intros. inversion H.
+  unfold not. intros. inversion H; subst. inversion H1.
+  unfold not. intros. inversion H; subst. inversion H1; subst.
+    inversion H2.
+  unfold not. intros. inversion H; subst. inversion H1; subst.
+    inversion H2; subst. inversion H3.
+Qed.
+
+Example no_repeats_bool1 : @no_repeats bool [].
+Proof.
+  constructor.
+Qed.
+
+Example no_repeats_nat2 : no_repeats [1; 2; 1].
+Proof.
+  constructor.
+  constructor.
+  constructor.
+  constructor.
+  unfold not. intros. inversion H.
+  unfold not. intros. inversion H; subst. inversion H1.
+  unfold not. intros. inversion H; subst. inversion H1; subst.
+Abort.
+
+Example no_repeats_bool2 : no_repeats [true; true].
+Proof.
+  constructor.
+  constructor.
+  constructor.
+  unfold not. intros. inversion H.
+  unfold not. intros. inversion H; subst.
+Abort.
+
+Theorem no_repeats_uncons : forall (X : Type) x (l : list X),
+  no_repeats (x :: l) -> no_repeats l.
+Proof.
+  intros.
+  induction l.
+    constructor.
+  inversion H; subst.
+  assumption.
+Qed.
 
 (** Finally, state and prove one or more interesting theorems relating
     [disjoint], [no_repeats] and [++] (list append).  *)
 
-(* FILL IN HERE *)
+Theorem state_and_prove_1 : forall {X} (l1 l2 : list X),
+  no_repeats (l1 ++ l2) -> disjoint l1 l2.
+Proof.
+  intros.
+  generalize dependent l2.
+  induction l1.
+    induction l2.
+      unfold disjoint.
+      intros. inversion H0.
+    unfold disjoint in *.
+    intros.
+    inversion H0.
+  induction l2.
+    unfold disjoint.
+    intros.
+    unfold not. intros. inversion H1.
+  unfold disjoint in *.
+  intuition.
+  apply IHl1.
+    simpl in H.
+    apply no_repeats_uncons in H.
+    assumption.
+  inversion H; subst.
+  contradiction H4.
+  apply app_appears_in.
+  right.
+Abort.
 (** [] *)
 
 
