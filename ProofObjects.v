@@ -126,7 +126,7 @@ Qed.
 
 
 (* ##################################################### *)
-(** ** Proof Scripts and Proof Objects *)
+(** * Proof Scripts and Proof Objects *)
 
 (** These proof objects lie at the core of how Coq operates.
 
@@ -205,7 +205,7 @@ Definition nine_is_beautiful' : beautiful 9 :=
 (** [] *)
 
 (* ##################################################### *)
-(** ** Quantification, Implications and Functions *)
+(** * Quantification, Implications and Functions *)
 
 (** In Coq's computational universe (where we've mostly been living
     until this chapter), there are two sorts of values with arrows in
@@ -432,7 +432,7 @@ Definition p : ex _ (fun n => beautiful (S n)) :=
 
 
 (* ##################################################### *)
-(** ** Giving Explicit Arguments to Lemmas and Hypotheses *)
+(** * Giving Explicit Arguments to Lemmas and Hypotheses *)
 
 (** Even when we are using tactic-based proof, it can be very useful to
 understand the underlying functional nature of implications and quantification.
@@ -501,7 +501,7 @@ Proof.
 
 
 (* ##################################################### *)
-(** ** Programming with Tactics (Optional) *)
+(** * Programming with Tactics (Optional) *)
 
 (** If we can build proofs with explicit terms rather than
 tactics, you may be wondering if we can build programs using

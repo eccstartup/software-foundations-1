@@ -5,7 +5,7 @@ Require Export Logic.
 
 
 (* ####################################################### *)
-(** ** From Boolean Functions to Propositions *)
+(** * From Boolean Functions to Propositions *)
 
 (** In chapter [Basics] we defined a _function_ [evenb] that tests a
     number for evenness, yielding [true] if so.  We can use this
@@ -29,7 +29,7 @@ Definition even (n:nat) : Prop :=
     concept of evenness means by giving two different ways of
     presenting _evidence_ that a number is even. *)
 
-(** ** Inductively Defined Propositions *)
+(** * Inductively Defined Propositions *)
 
 Inductive ev : nat -> Prop :=
   | ev_0 : ev O
@@ -150,7 +150,7 @@ Qed.
 
 
 (* ##################################################### *)
-(** * Inductively Defined Propositions *)
+(** ** Example *)
 
 (**  As a running example, let's
     define a simple property of natural numbers -- we'll call it
@@ -898,7 +898,7 @@ Qed.
 (** [] *)
 
 
-(** **** Exercise: 3 stars (R_provability) *)
+(** **** Exercise: 3 stars (R_provability2) *)
 Module R.
 (** We can define three-place relations, four-place relations,
     etc., in just the same way as binary relations.  For example,

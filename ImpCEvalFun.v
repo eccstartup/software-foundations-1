@@ -3,7 +3,7 @@
 (* $Date: 2013-07-01 18:48:47 -0400 (Mon, 01 Jul 2013) $ *)
 
 (* #################################### *)
-(** ** Evaluation Function *)
+(** * Evaluation Function *)
 
 Require Import Imp.
 
@@ -201,7 +201,7 @@ Proof. reflexivity. Qed.
 (** [] *)
 
 (* ################################################################ *)
-(** ** Equivalence of Relational and Step-Indexed Evaluation *)
+(** * Equivalence of Relational and Step-Indexed Evaluation *)
 
 (** As with arithmetic and boolean expressions, we'd hope that
     the two alternative definitions of evaluation actually boil down
@@ -340,7 +340,7 @@ Proof.
 Qed.
 
 (* ####################################################### *)
-(** ** Determinism of Evaluation (Simpler Proof) *)
+(** * Determinism of Evaluation (Simpler Proof) *)
 
 (** Here's a slicker proof showing that the evaluation relation is
     deterministic, using the fact that the relational and step-indexed
