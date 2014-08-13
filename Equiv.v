@@ -208,7 +208,7 @@ Proof.
    _Theorem_: If [b] is equivalent to [BTrue], then [IFB b THEN c1
    ELSE c2 FI] is equivalent to [c1].
 *)
-(** ** *)
+(** *** *)
 (**
    _Proof_: 
 
@@ -288,7 +288,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** ** *)
+(** *** *)
 
 (** For [WHILE] loops, we can give a similar pair of theorems.  A loop
     whose guard is equivalent to [BFalse] is equivalent to [SKIP],
@@ -322,7 +322,7 @@ Proof.
 []
 *)
 
-(** ** *)
+(** *** *)
 (** To prove the second fact, we need an auxiliary lemma stating that
     [WHILE] loops whose guards are equivalent to [BTrue] never
     terminate:
@@ -456,7 +456,7 @@ Proof.
     than for the second parameter, so it is no wonder that the
     equality doesn't hold. *)
 
-(** ** *)
+(** *** *)
 (** This problem is actually quite general. If we try to prove other
     simple facts, such as
     cequiv (X ::= X + 1;;
@@ -717,7 +717,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** ** *)
+(** *** *)
 
 (** For example, here are two equivalent programs and a proof of their
     equivalence... *)
@@ -824,7 +824,7 @@ Example fold_aexp_ex2 :
   = AMinus (AId X) (APlus (ANum 0) (AId Y)).
 Proof. reflexivity. Qed.
 
-(** ** *)
+(** *** *)
 (** Not only can we lift [fold_constants_aexp] to [bexp]s (in the
     [BEq] and [BLe] cases), we can also find constant _boolean_
     expressions and reduce them in-place. *)
@@ -872,7 +872,7 @@ Example fold_bexp_ex2 :
   = BAnd (BEq (AId X) (AId Y)) BTrue.
 Proof. reflexivity. Qed.
 
-(** ** *)
+(** *** *)
 (** To fold constants in a command, we apply the appropriate folding
     functions on all embedded expressions. *)
 
@@ -899,7 +899,7 @@ Fixpoint fold_constants_com (c : com) : com :=
       end
   end.
 
-(** ** *)
+(** *** *)
 Example fold_com_ex1 :
   fold_constants_com 
     (* Original program: *)
@@ -1181,7 +1181,7 @@ Definition subst_equiv_property := forall i1 i2 a1 a2,
   cequiv (i1 ::= a1;; i2 ::= a2)
          (i1 ::= a1;; i2 ::= subst_aexp i1 a1 a2).
 
-(** ** *)
+(** *** *)
 (** Sadly, the property does _not_ always hold. 
 
     _Theorem_: It is not the case that, for all [i1], [i2], [a1],
