@@ -391,6 +391,7 @@ Proof.
           SSCase "right". apply HR.
 Qed.
 
+Set Asymmetric Patterns.
 Definition truth (P Q R : Prop) (ip : (P \/ Q) /\ (P \/ R)) : P \/ (Q /\ R) :=
   match ip with
     | conj pq pr => match pq with

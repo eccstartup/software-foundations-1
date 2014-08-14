@@ -89,8 +89,8 @@ Check (cons nat 2 (cons nat 1 (nil nat))).
 
 Fixpoint length (X:Type) (l:list X) : nat :=
   match l with
-  | nil      => 0
-  | cons h t => S (length X t)
+  | nil _      => 0
+  | cons _ h t => S (length X t)
   end.
 
 (** Note that the uses of [nil] and [cons] in [match] patterns
@@ -122,20 +122,20 @@ Proof. reflexivity.  Qed.
 Fixpoint app (X : Type) (l1 l2 : list X)
                 : (list X) :=
   match l1 with
-  | nil      => l2
-  | cons h t => cons X h (app X t l2)
+  | nil _      => l2
+  | cons _ h t => cons X h (app X t l2)
   end.
 
 Fixpoint snoc (X:Type) (l:list X) (v:X) : (list X) :=
   match l with
-  | nil      => cons X v (nil X)
-  | cons h t => cons X h (snoc X t v)
+  | nil _      => cons X v (nil X)
+  | cons _ h t => cons X h (snoc X t v)
   end.
 
 Fixpoint rev (X:Type) (l:list X) : list X :=
   match l with
-  | nil      => nil X
-  | cons h t => snoc X (rev X t) h
+  | nil _      => nil X
+  | cons _ h t => snoc X (rev X t) h
   end.
 
 
@@ -195,8 +195,8 @@ End MumbleBaz.
 
 Fixpoint app' X l1 l2 : list X :=
   match l1 with
-  | nil      => l2
-  | cons h t => cons X h (app' X t l2)
+  | nil _      => l2
+  | cons _ h t => cons X h (app' X t l2)
   end.
 
 (** Indeed it will.  Let's see what type Coq has assigned to [app']: *)
@@ -259,8 +259,8 @@ Check app.
 
 Fixpoint length' (X:Type) (l:list X) : nat :=
   match l with
-  | nil      => 0
-  | cons h t => S (length' _ t)
+  | nil _      => 0
+  | cons _ h t => S (length' _ t)
   end.
 
 (** In this instance, we don't save much by writing [_] instead of
@@ -1128,117 +1128,3 @@ Proof.
 (** [] *)
 
 (* $Date: 2013-09-26 14:40:26 -0400 (Thu, 26 Sep 2013) $ *)
-
-
-Definition id {X} (a : X) : X := a.
-
-Definition compose {A B C}
-  (f : B -> C) (g : A -> B) (x : A) : C := f (g x).
-
-Notation "f ∘ g" := (compose f g) (at level 60, right associativity).
-
-Theorem comp_left_identity : forall {X Y} (f : X -> Y),
-  id ∘ f = f.
-Proof.
-  intros. reflexivity.  Qed.
-
-Theorem comp_right_identity : forall {X Y} (f : X -> Y),
-  f ∘ id = f.
-Proof.
-  intros. reflexivity.  Qed.
-
-Class Functor (F : Type -> Type) := {
-  fmap : forall {X Y}, (X -> Y) -> F X -> F Y;
-  functor_law_1 : forall {X} (x : F X), fmap (@id X) x = @id (F X) x;
-  functor_law_2 : forall {X Y Z} (x : F X) (f : Y -> Z) (g : X -> Y),
-    (fmap f ∘ fmap g) x = fmap (f ∘ g) x
-}.
-
-Global Instance List_Functor : Functor list := {
-  fmap := @map
-}.
-Proof.
-  (* functor_law_1 *)
-  intros. induction x as [| x'].
-  Case "x = nil". reflexivity.
-  Case "x = cons". simpl. rewrite IHx. reflexivity.
-
-  (* functor_law_2 *)
-  intros. induction x as [| x'].
-  Case "x = nil". reflexivity.
-  Case "x = cons".
-    unfold compose. unfold compose in IHx.
-    simpl. rewrite IHx. reflexivity.  Qed.
-
-Inductive Yoneda (F : Type -> Type) X : Type :=
-  | Embed : forall {Y}, F Y -> (Y -> X) -> Yoneda F X.
-
-Definition lift_yoneda (F : Type -> Type) X (a : F X)
-  : Yoneda F X := Embed F X a id.
-
-Definition lower_yoneda (F : Type -> Type) (f_dict : Functor F)
-  X (a : Yoneda F X) : F X :=
-  match a with | Embed F x f => fmap f x end.
-
-Theorem eq_remove_Embed : forall (F : Type -> Type) X Y (f : Y -> X) (n m : F Y),
-    n = m -> Embed F X n f = Embed F X m f.
-Proof.
-  intros. inversion H. reflexivity.  Qed.
-
-Definition yoneda_map {F : Type -> Type} {X Y}
-  (f : X -> Y) (x : Yoneda F X) : Yoneda F Y :=
-  match x with
-    | Embed X y g => Embed F Y y (f ∘ g)
-  end.
-
-Global Instance Yoneda_Functor (F : Type -> Type) : Functor (Yoneda F) := {
-  fmap := @yoneda_map F
-}.
-Proof.
-  (* functor_law_1 *)
-  intros. unfold yoneda_map. destruct x.
-    rewrite comp_left_identity. reflexivity.
-
-  (* functor_law_2 *)
-  intros. compute. destruct x. reflexivity.  Qed.
-
-Class Isomorphism X Y := {
-  to : X -> Y; from : Y -> X;
-  iso_to    : forall (x : X), from (to x) = x;
-  iso_from  : forall (y : Y), to (from y) = y
-}.
-
-Notation "X ≅ Y" := (Isomorphism X Y) (at level 50) : type_scope.
-
-Hypothesis yoneda_refl : forall (F : Type -> Type) (f_dict : Functor F)
-  X Y (f : Y -> X) (x : F Y),
-  Embed F X (fmap f x) id = Embed F X x f.
-
-Global Instance Yoneda_Lemma (F : Type -> Type) (f_dict : Functor F) X
-  : F X ≅ Yoneda F X := {
-  to   := lift_yoneda F X;
-  from := lower_yoneda F f_dict X
-}.
-Proof.
-  intros. compute. apply functor_law_1.
-
-  intros. unfold lower_yoneda. destruct y. unfold lift_yoneda.
-    apply yoneda_refl.  Qed.
-
-Inductive Source (M : Type -> Type) X : Type :=
-  | ASource : (forall {R}, R -> (R -> X -> M R) -> M R) -> Source M X.
-
-Definition source_map {M : Type -> Type} {X Y}
-  (f : X -> Y) (x : Source M X) : Source M Y :=
-  match x with
-    | ASource await =>
-        ASource M Y (fun R z yield => await R z (fun r y => yield r (f y)))
-  end.
-
-Global Instance Source_Functor (M : Type -> Type) (X : Type)
-  : Functor (Source M) := {
-  fmap := @source_map M
-}.
-Proof.
-  intros. compute. destruct x. reflexivity.
-  intros. compute. destruct x. reflexivity.  Qed.

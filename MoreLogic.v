@@ -1,6 +1,6 @@
 (** * More Logic *)
 
-Require Export "Prop".
+Require Export Prop2.
 
 (* ############################################################ *)
 (** * Existential Quantification *)
@@ -275,9 +275,9 @@ Qed.
     type [X] and a property [P : X -> Prop], such that [all X P l]
     asserts that [P] is true for every element of the list [l]. *)
 
-Inductive all (X : Type) (P : X -> Prop) : list X -> Prop :=
-  | vacuous : all X P []
-  | holds x xs : P x -> all X P xs -> all X P (x :: xs).
+Inductive all {X : Type} (P : X -> Prop) : list X -> Prop :=
+  | vacuous : all P []
+  | holds x xs : P x -> all P xs -> all P (x :: xs).
 
 (** Recall the function [forallb], from the exercise
     [forall_exists_challenge] in chapter [Poly]: *)
@@ -296,7 +296,7 @@ Fixpoint forallb {X : Type} (test : X -> bool) (l : list X) : bool :=
     are not captured by your specification? *)
 
 Theorem forallb_holds : forall X (test : X -> bool) (xs : list X),
-  forallb test xs = true <-> all X (fun x => test x = true) xs.
+  forallb test xs = true <-> all (fun x => test x = true) xs.
 Proof.
   intros. split.
   - intros. induction xs. constructor.
@@ -336,7 +336,65 @@ Qed.
     for one list to be a merge of two others.  Do this with an
     inductive relation, not a [Fixpoint].)  *)
 
-(* FILL IN HERE *)
+Inductive in_order_merge {X : Type} : list X -> list X -> list X -> Prop :=
+  | in_order_l_nil : forall l, in_order_merge l nil l
+  | in_order_r_nil : forall l, in_order_merge nil l l
+  | in_order_l l1 l2 : forall a l,
+      in_order_merge l1 l2 l -> in_order_merge (a :: l1) l2 (a :: l)
+  | in_order_r l1 l2 : forall a l,
+      in_order_merge l1 l2 l -> in_order_merge l1 (a :: l2) (a :: l).
+
+Example in_order_merge_ex1 : in_order_merge [1;6;2] [4;3] [1;4;6;2;3].
+Proof.
+  apply in_order_l.
+  apply in_order_r.
+  apply in_order_l.
+  apply in_order_l.
+  apply in_order_r.
+  apply in_order_l_nil.
+Qed.
+
+Lemma negb_flip : forall {X} (x : X) (test : X -> bool),
+  negb (test x) = true -> test x = false.
+Proof.
+  intros. destruct (test x). inversion H. reflexivity.
+Qed.
+
+(* Given statements of truth in the context, and a goal which can be
+   determined solely from those statements, discharge the goal. *)
+Ltac elim_truth :=
+  repeat (match goal with
+  | [ H: andb (negb ?X) _ = true |- (if ?X then _ else _) = _ ] =>
+    assert (X = false) as Hfalse by solve [
+      apply andb_true_elim1 in H;
+      apply negb_flip in H; assumption
+    ]; rewrite Hfalse; clear Hfalse
+  | [ H: andb ?X _ = true |- (if ?X then _ else _) = _ ] =>
+    assert (X = true) as Htrue by solve [
+      apply andb_true_elim1 in H; assumption
+    ]; rewrite Htrue; clear Htrue
+  | [ H: andb _ ?X = true |- ?X = true ] =>
+      apply andb_true_elim2 in H; assumption
+  end).
+
+Theorem filter_challenge : forall {X} (test : X -> bool) (l l1 l2 : list X),
+  let T := fun x => test x = true  in
+  let F := fun x => test x = false in
+  in_order_merge l1 l2 l
+    -> forallb test l1 = true
+    -> forallb (fun x => negb (test x)) l2 = true -> filter test l = l1.
+Proof.
+  Ltac logic_puzzle hyp :=
+    simpl in *; elim_truth;
+    try (try f_equal; apply hyp; elim_truth; auto).
+
+  intros. induction H; subst; simpl.
+  - induction l. auto. logic_puzzle IHl.
+  - induction l. auto. logic_puzzle IHl.
+  - logic_puzzle IHin_order_merge.
+  - logic_puzzle IHin_order_merge.
+Qed.
+
 (** [] *)
 
 (** **** Exercise: 5 stars, advanced, optional (filter_challenge_2) *)

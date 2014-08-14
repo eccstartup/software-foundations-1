@@ -1,6 +1,8 @@
+.*.aux
 *.glob
 *.d
 *.vo
 *.ml
 *.mli
 /imp.mli
+/.coq-native/
