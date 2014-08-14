@@ -735,6 +735,10 @@ Proof.
   intros.
   induction l. constructor.
   (* FILL IN HERE *)
+
+  (* jww (2014-08-14): It looks like I'm going to need an induction principle
+     which lets me perform "induction from both ends" before I'm going to be
+     able to solve this. *)
 Abort.
 
 Definition lt (n m:nat) := le (S n) m.
