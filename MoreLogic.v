@@ -378,8 +378,6 @@ Ltac elim_truth :=
   end).
 
 Theorem filter_challenge : forall {X} (test : X -> bool) (l l1 l2 : list X),
-  let T := fun x => test x = true  in
-  let F := fun x => test x = false in
   in_order_merge l1 l2 l
     -> forallb test l1 = true
     -> forallb (fun x => negb (test x)) l2 = true -> filter test l = l1.
