@@ -1129,22 +1129,17 @@ Proof.
     things than necessary.  Hint: what property do you need of [l1]
     and [l2] for [split] [combine l1 l2 = (l1,l2)] to be true?)  *)
 
-Definition split_combine_statement : Prop :=
-  forall (X : Type) (l1 l2 : list X),
+Definition split_combine_statement := forall X (l1 l2 : list X),
   length l1 = length l2 -> split (combine l1 l2) = (l1, l2).
 
 Theorem split_combine : split_combine_statement.
 Proof.
   unfold split_combine_statement. intros X l1.
-  induction l1 as [| l1'].
-  Case "l1 = 0".
-  intros. destruct l2 as [| l2'].
-    reflexivity.
-    simpl. inversion H.
-  Case "l1 = S l1'".
-  intros. destruct l2 as [| l2'].
-    simpl. inversion H.
-    simpl. rewrite IHl1. reflexivity. inversion H. reflexivity.  Qed.
+  induction l1; intros; simpl;
+    destruct l2; simpl; try inversion H; auto.
+  rewrite IHl1. reflexivity.
+  inversion H. reflexivity.
+Qed.
 
 (** [] *)
 
