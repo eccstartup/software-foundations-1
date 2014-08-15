@@ -1,6 +1,6 @@
 (** * More Logic *)
 
-Require Export Prop2.
+Require Export "Prop".
 
 (* ############################################################ *)
 (** * Existential Quantification *)
