@@ -675,15 +675,13 @@ Proof.
   intros X x l1.
   induction l1; intros; simpl;
   unfold disjoint in *; intros;
-  unfold not in *; intros.
-    inversion H1; subst.
-      contradiction H0.
-    inversion H2; subst; inversion H4.
+  unfold not in *; intros;
   inversion H1; subst.
-    contradiction H2.
-  destruct l2.
-    inversion H2.
-  contradiction (H x1).
+  - contradiction H0.
+  - inversion H2; subst; inversion H4.
+  - contradiction H2.
+  - destruct l2. inversion H2.
+    contradiction (H x1).
 Qed.
 
 Lemma not_appears_in_app : forall {X} (x : X) (l1 l2 : list X),
