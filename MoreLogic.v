@@ -664,33 +664,49 @@ Qed.
 (** Finally, state and prove one or more interesting theorems relating
     [disjoint], [no_repeats] and [++] (list append).  *)
 
-Theorem state_and_prove_1 : forall {X} (l1 l2 : list X),
+Lemma disjoint_nil : forall {X} (l : list X), disjoint [] l.
+Proof.
+  intros. induction l; unfold disjoint, not; intros; inversion H.
+Qed.
+
+Lemma disjoint_cons : forall {X} (x : X) (l1 l2 : list X),
+  disjoint l1 l2 -> not (appears_in x l2) -> disjoint (x :: l1) l2.
+Proof.
+  intros X x l1.
+  induction l1; intros; simpl;
+  unfold disjoint in *; intros;
+  unfold not in *; intros.
+    inversion H1; subst.
+      contradiction H0.
+    inversion H2; subst; inversion H4.
+  inversion H1; subst.
+    contradiction H2.
+  destruct l2.
+    inversion H2.
+  contradiction (H x1).
+Qed.
+
+Lemma not_appears_in_app : forall {X} (x : X) (l1 l2 : list X),
+  not (appears_in x (l1 ++ l2)) -> not (appears_in x l2).
+Proof.
+  intros. unfold not in *. intros.
+  apply H.
+  apply app_appears_in.
+  right. assumption.
+Qed.
+
+Theorem no_repeats_and_disjoint : forall {X} (l1 l2 : list X),
   no_repeats (l1 ++ l2) -> disjoint l1 l2.
 Proof.
-  intros.
-  generalize dependent l2.
-  induction l1.
-    induction l2.
-      unfold disjoint.
-      intros. inversion H0.
-    unfold disjoint in *.
-    intros.
-    inversion H0.
-  induction l2.
-    unfold disjoint.
-    intros.
-    unfold not. intros. inversion H1.
-  unfold disjoint in *.
-  intuition.
-  apply IHl1.
-    simpl in H.
-    apply no_repeats_uncons in H.
-    assumption.
+  intros X l1.
+  induction l1 as [| x xs]; intros; simpl.
+    apply disjoint_nil.
   inversion H; subst.
-  contradiction H4.
-  apply app_appears_in.
-  right.
-Abort.
+  apply disjoint_cons.
+    apply IHxs. assumption.
+  apply not_appears_in_app in H3.
+  assumption.
+Qed.
 (** [] *)
 
 
