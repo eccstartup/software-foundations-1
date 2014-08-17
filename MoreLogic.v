@@ -363,17 +363,17 @@ Qed.
 (* Given statements of truth in the context, and a goal which can be
    determined solely from those statements, discharge the goal. *)
 Ltac elim_truth :=
-  repeat (match goal with
-  | [ H: andb (negb ?X) _ = true |- (if ?X then _ else _) = _ ] =>
+  simpl in *; repeat (match goal with
+  | [ H: andb (negb ?X) _ = true |- context [if ?X then _ else _] ] =>
     assert (X = false) as Hfalse by solve [
       apply andb_true_elim1 in H;
       apply negb_flip in H; assumption
     ]; rewrite Hfalse; clear Hfalse
-  | [ H: andb ?X _ = true |- (if ?X then _ else _) = _ ] =>
+  | [ H: andb ?X _ = true |- context [if ?X then _ else _] ] =>
     assert (X = true) as Htrue by solve [
       apply andb_true_elim1 in H; assumption
     ]; rewrite Htrue; clear Htrue
-  | [ H: andb _ ?X = true |- ?X = true ] =>
+  | [ H: andb _ ?X = true |- context [?X = true] ] =>
       apply andb_true_elim2 in H; assumption
   end).
 
@@ -401,7 +401,64 @@ Qed.
     that [test] evaluates to [true] on all their members, [filter test
     l] is the longest.  Express this claim formally and prove it. *)
 
-(* FILL IN HERE *)
+Inductive is_subseq {X} : list X -> list X -> Prop :=
+  | subseq_nil : forall l, is_subseq nil l
+  | subseq_cons : forall x m l, is_subseq m l -> is_subseq (x :: m) (x :: l)
+  | subseq_skip : forall x m l, is_subseq m l -> is_subseq m (x :: l).
+
+Example is_subseq_ex1 : is_subseq [1;2;3] [1;5;2;4;6;3].
+Proof. repeat constructor. Qed.
+
+(* Example is_subseq_ex2 : is_subseq [1;2;3] [1;5;2;4;6]. *)
+(* Proof. repeat constructor. Abort. *)
+
+(* Example is_subseq_ex3 : is_subseq [1;3;2] [1;5;2;4;6;3]. *)
+(* Proof. repeat constructor. Abort. *)
+
+Lemma self_subseq : forall {X} (l : list X), is_subseq l l.
+Proof.
+  intros.
+  induction l; constructor.
+  apply IHl.
+Qed.
+
+Lemma subseq_of_nil : forall {X} (l : list X), is_subseq l [] -> l = [].
+Proof.
+  intros.
+  inversion H. auto.
+Qed.
+
+Lemma is_subseq_uncons : forall {X} (x : X) (l m : list X),
+  is_subseq (x :: m) l -> is_subseq m l.
+Proof.
+  intros.
+  induction l.
+    inversion H.
+  constructor.
+  inversion H; subst.
+    assumption.
+  apply IHl.
+  assumption.
+Qed.
+
+Lemma le_succ : forall (x y : nat), x <= y -> x <= S y.
+Proof. auto. Qed.
+
+Lemma filter_challenge_2 : forall {X} (test : X -> bool) (l m : list X),
+  is_subseq m l -> forallb test m = true -> length m <= length (filter test l).
+Proof.
+  intros X test l.
+  induction l as [| x xs]; intros; simpl;
+  inversion H; subst; simpl;
+  try (apply Le.le_0_n).
+  - elim_truth.
+    apply Le.le_n_S.
+    apply IHxs. assumption.
+    elim_truth.
+  - destruct (test x);
+    try (apply le_succ);
+    apply IHxs; assumption.
+Qed.
 (** [] *)
 
 (** **** Exercise: 4 stars, advanced (no_repeats) *)
