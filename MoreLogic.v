@@ -774,8 +774,7 @@ Proof.
 Qed.
 
 Lemma appears_in_app_split : forall (X:Type) (x:X) (l:list X),
-  appears_in x l ->
-  exists l1, exists l2, l = l1 ++ (x::l2).
+  appears_in x l -> exists l1, exists l2, l = l1 ++ (x::l2).
 Proof.
   intros.
   induction H.
@@ -844,13 +843,31 @@ Proof.
   intros X l1.
   induction l1 as [|x xs]; intros.
     inversion H1.
-(*
   assert (appears_in x xs \/ ~ appears_in x xs).
     unfold excluded_middle in H. apply H.
   inversion H2.
     apply repeats_head.
     assumption.
   apply repeats_tail.
+(*
+  pose (ai_here x).
+  apply H0 in a.
+  apply appears_in_app_split in a.
+  destruct a. destruct H4.
+  subst.
+  apply (IHxs (witness ++ x :: witness0)). assumption.
+    intros.
+    apply (appears_in_app _ witness _ x0) in H0.
+    apply app_appears_in. assumption.
+    constructor. assumption.
+  apply (IHxs (witness ++ witness0)). assumption.
+    intros. apply H0.
+    constructor.
+    assumption.
+  rewrite app_length in H1.
+  unfold lt in *.
+  simpl in *.
+  admit.
   destruct l2.
     admit.
   apply (IHxs l2). assumption.
