@@ -722,8 +722,10 @@ Qed.
     does not stutter.) *)
 
 Inductive nostutter:  list nat -> Prop :=
- (* FILL IN HERE *)
-.
+  | nostutter_nil    : nostutter nil
+  | nostutter_sing x : nostutter [x]
+  | nostutter_cons x y xs :
+      nostutter (y :: xs) -> x <> y -> nostutter (x :: y :: xs).
 
 (** Make sure each of these tests succeeds, but you are free
     to change the proof if the given one doesn't work for you.
@@ -737,34 +739,22 @@ Inductive nostutter:  list nat -> Prop :=
     you prefer you can also prove each example with more basic
     tactics.  *)
 
-Example test_nostutter_1:      nostutter [3;1;4;1;5;6].
-(* FILL IN HERE *) Admitted.
-(*
-  Proof. repeat constructor; apply beq_nat_false; auto. Qed.
-*)
+Example test_nostutter_1:  nostutter [3;1;4;1;5;6].
+Proof. repeat constructor; apply beq_nat_false; auto. Qed.
 
 Example test_nostutter_2:  nostutter [].
-(* FILL IN HERE *) Admitted.
-(*
-  Proof. repeat constructor; apply beq_nat_false; auto. Qed.
-*)
+Proof. repeat constructor; apply beq_nat_false; auto. Qed.
 
 Example test_nostutter_3:  nostutter [5].
-(* FILL IN HERE *) Admitted.
-(*
-  Proof. repeat constructor; apply beq_nat_false; auto. Qed.
-*)
+Proof. repeat constructor; apply beq_nat_false; auto. Qed.
 
 Example test_nostutter_4:      not (nostutter [3;1;1;4]).
-(* FILL IN HERE *) Admitted.
-(*
-  Proof. intro.
+Proof. intro.
   repeat match goal with
     h: nostutter _ |- _ => inversion h; clear h; subst
   end.
-  contradiction H1; auto. Qed.
-*)
-(** [] *)
+  contradiction H5; auto.
+Qed.
 
 (** **** Exercise: 4 stars, advanced (pigeonhole principle) *)
 (** The "pigeonhole principle" states a basic fact about counting:
@@ -779,21 +769,51 @@ Example test_nostutter_4:      not (nostutter [3;1;1;4]).
 Lemma app_length : forall (X:Type) (l1 l2 : list X),
   length (l1 ++ l2) = length l1 + length l2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X l1.
+  induction l1; intros; simpl; auto.
+Qed.
 
 Lemma appears_in_app_split : forall (X:Type) (x:X) (l:list X),
   appears_in x l ->
   exists l1, exists l2, l = l1 ++ (x::l2).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction H.
+    exists nil.
+    exists l. reflexivity.
+  destruct IHappears_in.
+  destruct H0.
+  rewrite H0.
+  exists (b :: witness).
+  exists witness0.
+  reflexivity.
+Qed.
 
 (** Now define a predicate [repeats] (analogous to [no_repeats] in the
    exercise above), such that [repeats X l] asserts that [l] contains
    at least one repeated element (of type [X]).  *)
 
 Inductive repeats {X:Type} : list X -> Prop :=
-  (* FILL IN HERE *)
-.
+  | repeats_head x xs : appears_in x xs -> repeats (x :: xs)
+  | repeats_tail x xs : repeats xs -> repeats (x :: xs).
+
+Example repeats_ex1:  repeats [1;1].
+Proof. repeat constructor. Qed.
+
+Example repeats_ex2:  repeats [1;1;3].
+Proof. repeat constructor. Qed.
+
+Example repeats_ex3:  repeats [3;1;1].
+Proof. intros. right. repeat constructor. Qed.
+
+Example repeats_ex4:  repeats [1;3;1].
+Proof. intros. constructor. repeat constructor. Qed.
+
+Example repeats_ex5:  repeats [1;3;1;4;1].
+Proof. intros. constructor. repeat constructor. Qed.
+
+Example repeats_ex6:  repeats [1].
+Proof. repeat constructor. Abort.
 
 (** Now here's a way to formalize the pigeonhole principle. List [l2]
     represents a list of pigeonhole labels, and list [l1] represents
@@ -806,17 +826,43 @@ Inductive repeats {X:Type} : list X -> Prop :=
     [appears_in] is decidable; if you can manage to do this, you will
     not need the [excluded_middle] hypothesis. *)
 
-Theorem pigeonhole_principle: forall (X:Type) (l1  l2:list X),
-   excluded_middle ->
-   (forall x, appears_in x l1 -> appears_in x l2) ->
-   length l2 < length l1 ->
-   repeats l1.
+Theorem repeats_or: forall (X:Type) (h:X) (t:list X),
+  repeats t \/ appears_in h t -> repeats (h::t).
 Proof.
-   intros X l1. induction l1 as [|x l1'].
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros X h t Hor.
+  inversion Hor.
+  apply repeats_tail. apply H.
+  apply repeats_head. apply H.
+Qed.
 
-(* FILL IN HERE *)
-
+Theorem pigeonhole_principle: forall (X:Type) (l1 l2:list X),
+  excluded_middle
+    -> (forall x, appears_in x l1 -> appears_in x l2)
+    -> length l2 < length l1
+    -> repeats l1.
+Proof.
+  intros X l1.
+  induction l1 as [|x xs]; intros.
+    inversion H1.
+(*
+  assert (appears_in x xs \/ ~ appears_in x xs).
+    unfold excluded_middle in H. apply H.
+  inversion H2.
+    apply repeats_head.
+    assumption.
+  apply repeats_tail.
+  destruct l2.
+    admit.
+  apply (IHxs l2). assumption.
+    intros.
+    apply H1.
+    constructor.
+    assumption.
+  simpl in H0
+  unfold lt in *.
+  apply Le.le_S_n in H1.
+  assumption.
+*)
+Admitted.
 
 (* $Date: 2014-02-22 09:43:41 -0500 (Sat, 22 Feb 2014) $ *)
