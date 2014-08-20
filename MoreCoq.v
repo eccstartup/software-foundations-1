@@ -1233,12 +1233,12 @@ Definition existsb' {X : Type} (f : X -> bool) (l : list X) : bool :=
 Theorem existsb'_matches : forall {X : Type} (f : X -> bool) (l : list X),
   existsb f l = existsb' f l.
 Proof.
-  intros. induction l as [| l'].
-  Case "l = 0".
-  reflexivity.
-  Case "l = S l'".
-  simpl. rewrite IHl. unfold existsb'. unfold forallb.
-    destruct (f l'). reflexivity. reflexivity.  Qed.
+  intros. induction l.
+    reflexivity.
+  simpl. rewrite IHl.
+  unfold existsb', forallb.
+  destruct (f x); reflexivity.
+Qed.
 
 (** [] *)
 
