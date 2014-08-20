@@ -719,17 +719,6 @@ Proof.
   induction l; reflexivity.
 Qed.
 
-(*
-Definition rev_pal' (X : Type) (l : list X) (H : l = rev l) : pal X l :=
-  match l with
-  | nil => pal_nil X
-  | cons x xs => match rev xs with
-    | nil => pal_one X x
-    | cons x xs' => pal_xs X xs'
-    end
-  end.
-*)
-
 Theorem rev_pal : forall X l, l = rev l -> pal X l.
 Proof.
   intros.

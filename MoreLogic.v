@@ -796,24 +796,6 @@ Inductive repeats {X:Type} : list X -> Prop :=
   | repeats_head x xs : appears_in x xs -> repeats (x :: xs)
   | repeats_tail x xs : repeats xs -> repeats (x :: xs).
 
-Example repeats_ex1:  repeats [1;1].
-Proof. repeat constructor. Qed.
-
-Example repeats_ex2:  repeats [1;1;3].
-Proof. repeat constructor. Qed.
-
-Example repeats_ex3:  repeats [3;1;1].
-Proof. intros. right. repeat constructor. Qed.
-
-Example repeats_ex4:  repeats [1;3;1].
-Proof. intros. constructor. repeat constructor. Qed.
-
-Example repeats_ex5:  repeats [1;3;1;4;1].
-Proof. intros. constructor. repeat constructor. Qed.
-
-Example repeats_ex6:  repeats [1].
-Proof. repeat constructor. Abort.
-
 (** Now here's a way to formalize the pigeonhole principle. List [l2]
     represents a list of pigeonhole labels, and list [l1] represents
     the labels assigned to a list of items: if there are more items
@@ -825,61 +807,20 @@ Proof. repeat constructor. Abort.
     [appears_in] is decidable; if you can manage to do this, you will
     not need the [excluded_middle] hypothesis. *)
 
-Theorem repeats_or: forall (X:Type) (h:X) (t:list X),
-  repeats t \/ appears_in h t -> repeats (h::t).
-Proof.
-  intros X h t Hor.
-  inversion Hor.
-  apply repeats_tail. apply H.
-  apply repeats_head. apply H.
-Qed.
+Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
+Set Implicit Arguments.
 
 Theorem pigeonhole_principle: forall (X:Type) (l1 l2:list X),
-  excluded_middle
-    -> (forall x, appears_in x l1 -> appears_in x l2)
+  (forall x, appears_in x l1 -> appears_in x l2)
     -> length l2 < length l1
     -> repeats l1.
 Proof.
-  intros X l1.
-  induction l1 as [|x xs]; intros.
-    inversion H1.
-  assert (appears_in x xs \/ ~ appears_in x xs).
-    unfold excluded_middle in H. apply H.
-  inversion H2.
-    apply repeats_head.
-    assumption.
+  move=> X.
+  elim=> [|x xs IHxs] l2 Happ Hlen.
+    inversion Hlen.
   apply repeats_tail.
-(*
-  pose (ai_here x).
-  apply H0 in a.
-  apply appears_in_app_split in a.
-  destruct a. destruct H4.
-  subst.
-  apply (IHxs (witness ++ x :: witness0)). assumption.
-    intros.
-    apply (appears_in_app _ witness _ x0) in H0.
-    apply app_appears_in. assumption.
-    constructor. assumption.
-  apply (IHxs (witness ++ witness0)). assumption.
-    intros. apply H0.
-    constructor.
-    assumption.
-  rewrite app_length in H1.
-  unfold lt in *.
-  simpl in *.
-  admit.
-  destruct l2.
-    admit.
-  apply (IHxs l2). assumption.
-    intros.
-    apply H1.
-    constructor.
-    assumption.
-  simpl in H0
-  unfold lt in *.
-  apply Le.le_S_n in H1.
-  assumption.
-*)
+  apply: IHxs => // [z ?|].
+  apply: Happ. by constructor.
 Admitted.
 
 (* $Date: 2014-02-22 09:43:41 -0500 (Sat, 22 Feb 2014) $ *)
