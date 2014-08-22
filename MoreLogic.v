@@ -693,6 +693,15 @@ Proof.
   right. assumption.
 Qed.
 
+Lemma not_appears_in_cons : forall {X} (x y : X) (l2 : list X),
+  not (appears_in x (y :: l2)) -> not (appears_in x l2).
+Proof.
+  intros. unfold not in *. intros.
+  apply H.
+  constructor.
+  assumption.
+Qed.
+
 Theorem no_repeats_and_disjoint : forall {X} (l1 l2 : list X),
   no_repeats (l1 ++ l2) -> disjoint l1 l2.
 Proof.
@@ -807,20 +816,42 @@ Inductive repeats {X:Type} : list X -> Prop :=
     [appears_in] is decidable; if you can manage to do this, you will
     not need the [excluded_middle] hypothesis. *)
 
-Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
-Set Implicit Arguments.
+Lemma flip_neq : forall (X : Type) (x y : X), x <> y -> y <> x.
+Proof.
+  intros. unfold not in *. intros.
+  apply H. symmetry. auto.
+Qed.
 
-Theorem pigeonhole_principle: forall (X:Type) (l1 l2:list X),
-  (forall x, appears_in x l1 -> appears_in x l2)
+Theorem pigeonhole_principle : forall X (l1 l2 : list X),
+  excluded_middle
+    -> (forall x, appears_in x l1 -> appears_in x l2)
     -> length l2 < length l1
     -> repeats l1.
 Proof.
-  move=> X.
-  elim=> [|x xs IHxs] l2 Happ Hlen.
+  induction l1 as [|x xs IHxs]; intros l2 LEM Happ Hlen.
     inversion Hlen.
-  apply repeats_tail.
-  apply: IHxs => // [z ?|].
-  apply: Happ. by constructor.
-Admitted.
+  assert (appears_in x xs \/ ~ appears_in x xs). apply LEM.
+  inversion H. left. assumption. right.
+  pose (ai_here x xs).
+  apply Happ in a.
+  apply appears_in_app_split in a.
+  destruct a. destruct H1.
+  apply (IHxs (witness ++ witness0)); subst. auto. intros.
+    assert (x = x0 \/ x <> x0). apply LEM.
+    inversion H2; subst. contradiction H0.
+    apply app_appears_in.
+    specialize (Happ x0).
+    apply ai_later with (b := x) in H1.
+    apply Happ in H1.
+    apply appears_in_app in H1.
+    inversion H1. left. assumption. right.
+    apply appears_before_cons with (y := x). assumption.
+    apply flip_neq. apply H3.
+  rewrite app_length in Hlen. simpl in Hlen.
+  apply Le.le_S_n in Hlen.
+  rewrite app_length.
+  unfold lt in *.
+  rewrite plus_n_Sm. auto.
+Qed.
 
 (* $Date: 2014-02-22 09:43:41 -0500 (Sat, 22 Feb 2014) $ *)
