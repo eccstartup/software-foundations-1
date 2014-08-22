@@ -6,3 +6,4 @@
 *.mli
 /imp.mli
 /.coq-native/
+Makefile
