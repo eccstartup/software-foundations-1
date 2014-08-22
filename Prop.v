@@ -1,7 +1,7 @@
 (** * Prop: Propositions and Evidence *)
 
 Require Export Logic.
-
+Require Recdef.
 
 
 (* ####################################################### *)
@@ -714,21 +714,43 @@ Proof.
 Qed.
 
 Theorem app_cons : forall X (l : list X) (x : X), x :: l = [x] ++ l.
+Proof. intros. induction l; reflexivity. Qed.
+
+Lemma app_length : forall (X:Type) (l1 l2 : list X),
+  length (l1 ++ l2) = length l1 + length l2.
+Proof. induction l1; intros; simpl; auto. Qed.
+
+Lemma length_snoc : forall X x (l : list X),
+  length (snoc l x) = S (length l).
 Proof.
   intros.
-  induction l; reflexivity.
+  rewrite snoc_append.
+  rewrite app_length.
+  rewrite plus_comm. auto.
 Qed.
 
-Theorem rev_pal : forall X l, l = rev l -> pal X l.
+Lemma rev_pal_length : forall X n l, length l <= n -> l = rev l -> pal X l.
 Proof.
-  intros.
-  induction l. constructor.
-  (* FILL IN HERE *)
+  induction n; intros.
+    inversion H.
+    destruct l; [ constructor | inversion H2 ].
+  destruct l. constructor.
+  simpl in *.
+  apply Le.le_S_n in H.
+  rewrite H0.
+  destruct (rev l) eqn:Heqe. constructor.
+  inversion H0; subst.
+  constructor.
+  apply IHn.
+    rewrite length_snoc in H.
+    apply Le.le_Sn_le. assumption.
+  rewrite rev_snoc in Heqe.
+  inversion Heqe.
+  rewrite H2 at 2. reflexivity.
+Qed.
 
-  (* jww (2014-08-14): It looks like I'm going to need an induction principle
-     which lets me perform "induction from both ends" before I'm going to be
-     able to solve this. *)
-Abort.
+Theorem rev_pal : forall X (l : list X), l = rev l -> pal X l.
+Proof. intros. apply (rev_pal_length X (length l)); auto. Qed.
 
 Definition lt (n m:nat) := le (S n) m.
 
