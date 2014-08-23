@@ -186,11 +186,13 @@ Print eight_is_beautiful'''.
 Theorem six_is_beautiful :
   beautiful 6.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  apply (b_sum 3 3).
+  constructor.
+  constructor.
+Qed.
 
 Definition six_is_beautiful' : beautiful 6 :=
-  (* FILL IN HERE *) admit.
-(** [] *)
+  b_sum 3 3 b_3 b_3.
 
 (** **** Exercise: 1 star (nine_is_beautiful) *)
 (** Give a tactic proof and a proof object showing that [9] is [beautiful]. *)
@@ -198,11 +200,15 @@ Definition six_is_beautiful' : beautiful 6 :=
 Theorem nine_is_beautiful :
   beautiful 9.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  apply (b_sum 6 3).
+  apply (b_sum 3 3).
+  constructor.
+  constructor.
+  constructor.
+Qed.
 
 Definition nine_is_beautiful' : beautiful 9 :=
-  (* FILL IN HERE *) admit.
-(** [] *)
+  b_sum 6 3 (b_sum 3 3 b_3 b_3) b_3.
 
 (* ##################################################### *)
 (** * Quantification, Implications and Functions *)
@@ -291,20 +297,35 @@ Definition beatiful_plus3'' : Prop :=
 
 (** Give a proof object corresponding to the theorem [b_times2] from Prop.v *)
 
-Definition b_times2': forall n, beautiful n -> beautiful (2*n) :=
-  (* FILL IN HERE *) admit.
-(** [] *)
+Notation "'rew' H 'in' H'" :=
+  (eq_rect _ _ H' _ H) (at level 10, H' at level 10).
+Notation "'rew' H 'in' H' 'for' P" :=
+  (eq_rect _ P H' _ H) (at level 10, H' at level 10).
 
+Notation "'rew' <- H 'in' H'" :=
+  (eq_rect_r _ H' H) (at level 10, H' at level 10).
+Notation "'rew' <- H 'in' H' 'for' P" :=
+  (eq_rect_r P H' H) (at level 10, H' at level 10).
+
+Fixpoint b_times2' (n : nat) (H : beautiful n) : beautiful (2*n) :=
+  match H with
+    | b_0 => rew <- (mult_0_r 2) in b_0
+    | b_3 => b_sum 3 3 b_3 b_3
+    | b_5 => b_sum 5 5 b_5 b_5
+    | b_sum p q P Q =>
+        rew (mult_comm (p + q) 2)
+            in (rew <- (mult_plus_distr_r p q 2)
+                    in b_sum (p * 2) (q * 2)
+                           (rew (mult_comm 2 p) in (b_times2' p P))
+                           (rew (mult_comm 2 q) in (b_times2' q Q)))
+    end.
 
 
 (** **** Exercise: 2 stars, optional (gorgeous_plus13_po) *)
 (** Give a proof object corresponding to the theorem [gorgeous_plus13] from Prop.v *)
 
-Definition gorgeous_plus13_po: forall n, gorgeous n -> gorgeous (13+n):=
-   (* FILL IN HERE *) admit.
-(** [] *)
-
-
+Definition gorgeous_plus13_po (n : nat) (H : gorgeous n) : gorgeous (13+n) :=
+  g_plus5 (5 + (3 + n)) (g_plus5 (3 + n) (g_plus3 n H)).
 
 
 (** It is particularly revealing to look at proof objects involving the
@@ -333,7 +354,6 @@ Print and_example.
     [and_example] to avoid cluttering the proof object.  What would
     you guess the proof object will look like if we uncomment them?
     Try it and see. *)
-(** [] *)
 
 Theorem and_commut : forall P Q : Prop,
   P /\ Q -> Q /\ P.
@@ -378,9 +398,7 @@ we get: *)
 (** Construct a proof object demonstrating the following proposition. *)
 
 Definition conj_fact : forall P Q R, P /\ Q -> Q /\ R -> P /\ R :=
-  (* FILL IN HERE *) admit.
-(** [] *)
-
+  fun P Q R X Y => conj P R (proj1 P Q X) (proj2 Q R Y).
 
 (** **** Exercise: 2 stars, advanced, optional (beautiful_iff_gorgeous) *)
 
@@ -391,18 +409,18 @@ Definition conj_fact : forall P Q R, P /\ Q -> Q /\ R -> P /\ R :=
     using tactics. (_Hint_: if you make use of previously defined
     theorems, you should only need a single line!) *)
 
-Definition beautiful_iff_gorgeous :
-  forall n, beautiful n <-> gorgeous n :=
-  (* FILL IN HERE *) admit.
-(** [] *)
-
+Definition beautiful_iff_gorgeous : forall n, beautiful n <-> gorgeous n :=
+  fun n => conj _ _ (beautiful__gorgeous n) (gorgeous__beautiful n).
 
 (** **** Exercise: 2 stars, optional (or_commut'') *)
 (** Try to write down an explicit proof object for [or_commut] (without
     using [Print] to peek at the ones we already defined!). *)
 
-(* FILL IN HERE *)
-(** [] *)
+Definition or_commut : forall P Q : Prop, P \/ Q -> Q \/ P :=
+  fun P Q H => match H with
+    | or_introl p => or_intror _ _ p
+    | or_intror q => or_introl _ _ q
+    end.
 
 (** Recall that we model an existential for a property as a pair consisting of
 a witness value and a proof that the witness obeys that property.
@@ -425,10 +443,7 @@ Definition snie : some_nat_is_even :=
 (** **** Exercise: 2 stars, optional (ex_beautiful_Sn) *)
 (** Complete the definition of the following proof object: *)
 
-Definition p : ex _ (fun n => beautiful (S n)) :=
-(* FILL IN HERE *) admit.
-(** [] *)
-
+Definition p : ex _ (fun n => beautiful (S n)) := ex_intro _ _ 2 b_3.
 
 
 (* ##################################################### *)
@@ -494,10 +509,7 @@ Example trans_eq_example' : forall (a b c d e f : nat),
      [a;b] = [c;d] ->
      [c;d] = [e;f] ->
      [a;b] = [e;f].
-Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
-
+Proof. intros. transitivity [c; d]; assumption. Qed.
 
 
 (* ##################################################### *)

@@ -287,14 +287,14 @@ Qed.
 Theorem b_times2: forall n, beautiful n -> beautiful (2*n).
 Proof.
   intros. induction H.
-  rewrite mult_0_r. constructor.
-  apply b_sum with (n:=3) (m:=3); constructor.
-  apply b_sum with (n:=5) (m:=5); constructor.
-  rewrite mult_comm.
-  rewrite mult_plus_distr_r.
-  apply b_sum with (n:=(n * 2)) (m:=(m * 2)).
-  rewrite mult_comm. apply IHbeautiful1.
-  rewrite mult_comm. apply IHbeautiful2.
+  - rewrite mult_0_r. constructor.
+  - apply b_sum with (n:=3) (m:=3); constructor.
+  - apply b_sum with (n:=5) (m:=5); constructor.
+  - rewrite mult_comm.
+    rewrite mult_plus_distr_r.
+    apply b_sum with (n:=(n * 2)) (m:=(m * 2)).
+    rewrite mult_comm. apply IHbeautiful1.
+    rewrite mult_comm. apply IHbeautiful2.
 Qed.
 (** [] *)
 
@@ -367,12 +367,9 @@ Inductive gorgeous : nat -> Prop :=
 Theorem gorgeous_plus13: forall n,
   gorgeous n -> gorgeous (13+n).
 Proof.
-  intros. induction n as [| n'].
-  Case "n = 0".
-  simpl. apply g_plus5. apply g_plus5. apply g_plus3. apply H.
-  Case "n = S n'".
-  apply g_plus5. apply g_plus5. apply g_plus3. apply H.  Qed.
-(** [] *)
+  intros. apply g_plus5. apply g_plus5. apply g_plus3. apply H.
+Qed.
+
 
 (** *** *)
 (** It seems intuitively obvious that, although [gorgeous] and
