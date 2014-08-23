@@ -73,8 +73,10 @@ Proof.
 Theorem plus_one_r' : forall n:nat,
   n + 1 = S n.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  (* intros n. rewrite plus_comm. apply plus_1_l. *)
+  apply nat_ind. reflexivity.
+  intros. simpl. f_equal. assumption.
+Qed.
 
 (** Coq generates induction principles for every datatype defined with
     [Inductive], including those that aren't recursive. (Although
@@ -118,7 +120,6 @@ Inductive rgb : Type :=
   | green : rgb
   | blue : rgb.
 Check rgb_ind.
-(** [] *)
 
 (** Here's another example, this time with one of the constructors
     taking some arguments. *)
@@ -144,7 +145,20 @@ Inductive natlist1 : Type :=
   | nsnoc1 : natlist1 -> nat -> natlist1.
 
 (** Now what will the induction principle look like? *)
-(** [] *)
+Definition natlist1_ind' :
+  forall P : natlist1 -> Prop,
+    P nnil1 ->
+    (forall (l : natlist1), P l -> forall (n : nat), P (nsnoc1 l n)) ->
+    forall n : natlist1, P n.
+Proof.
+  intros.
+  induction n; auto.
+Defined.
+
+Example natlist1_ex1 : forall P, natlist1_ind P = natlist1_ind' P.
+Proof.
+  intros. reflexivity.
+Qed.
 
 (** From these examples, we can extract this general rule:
 
@@ -172,8 +186,23 @@ Inductive byntree : Type :=
  | bempty : byntree
  | bleaf  : yesno -> byntree
  | nbranch : yesno -> byntree -> byntree -> byntree.
-(** [] *)
 
+Definition byntree_ind' :
+  forall P : byntree -> Prop,
+    P bempty ->
+    (forall (yn : yesno), P (bleaf yn)) ->
+    (forall (yn : yesno) (x : byntree),
+      P x -> forall (y : byntree), P y -> P (nbranch yn x y)) ->
+    forall b : byntree, P b.
+Proof.
+  intros.
+  induction b; auto.
+Defined.
+
+Example byntree_ex1 : forall P, byntree_ind P = byntree_ind' P.
+Proof.
+  intros. reflexivity.
+Qed.
 
 (** **** Exercise: 1 star, optional (ex_set) *)
 (** Here is an induction principle for an inductively defined
@@ -186,9 +215,10 @@ Inductive byntree : Type :=
     Give an [Inductive] definition of [ExSet]: *)
 
 Inductive ExSet : Type :=
-  (* FILL IN HERE *)
-.
-(** [] *)
+  | con1 : bool -> ExSet
+  | con2 : nat -> ExSet -> ExSet.
+
+Check ExSet_ind.
 
 (** What about polymorphic datatypes?
 
@@ -222,7 +252,21 @@ Inductive tree (X:Type) : Type :=
   | leaf : X -> tree X
   | node : tree X -> tree X -> tree X.
 Check tree_ind.
-(** [] *)
+
+Definition tree_ind' :
+  forall X (P : tree X -> Prop),
+    (forall x : X, P (leaf X x)) ->
+    (forall t : tree X, P t -> forall u : tree X, P u -> P (node X t u)) ->
+    forall t: tree X, P t.
+Proof.
+  intros.
+  induction t; auto.
+Defined.
+
+Example tree_ex1 : forall P, tree_ind P = tree_ind' P.
+Proof.
+  intros. reflexivity.
+Qed.
 
 (** **** Exercise: 1 star, optional (mytype) *)
 (** Find an inductive definition that gives rise to the
@@ -235,7 +279,12 @@ Check tree_ind.
                forall n : nat, P (constr3 X m n)) ->
             forall m : mytype X, P m
 *)
-(** [] *)
+Inductive mytype (X : Type) : Type :=
+  | constr1 : X -> mytype X
+  | constr2 : nat -> mytype X
+  | constr3 : mytype X -> nat -> mytype X.
+
+Check mytype_ind.
 
 (** **** Exercise: 1 star, optional (foo) *)
 (** Find an inductive definition that gives rise to the
@@ -248,7 +297,12 @@ Check tree_ind.
                (forall n : nat, P (f1 n)) -> P (quux X Y f1)) ->
              forall f2 : foo X Y, P f2
 *)
-(** [] *)
+Inductive foo (X Y : Type) : Type :=
+  | bar  : X -> foo X Y
+  | baz  : Y -> foo X Y
+  | quux : (nat -> foo X Y) -> foo X Y.
+
+Check foo_ind.
 
 (** **** Exercise: 1 star, optional (foo') *)
 (** Consider the following inductive definition: *)
@@ -268,7 +322,22 @@ Inductive foo' (X:Type) : Type :=
              forall f : foo' X, ________________________
 *)
 
-(** [] *)
+Definition foo'_ind' (X : Type) :
+  forall (P : foo' X -> Prop),
+    (forall (l : list X) (f : foo' X), P f -> P (C1 X l f)) ->
+    P (C2 X) ->
+    forall f: foo' X, P f.
+Proof.
+  intros.
+  induction f; auto.
+Defined.
+
+Example foo'_ex1 : forall P, foo'_ind P = foo'_ind' P.
+Proof.
+  intros. reflexivity.
+Qed.
+
+Check foo'_ind.
 
 (* ##################################################### *)
 (** ** Induction Hypotheses *)
@@ -407,8 +476,28 @@ Proof.
     induction, and state the theorem and proof in terms of this
     defined proposition.  *)
 
-(* FILL IN HERE *)
-(** [] *)
+Definition P_pa (n m p:nat) : Prop := n + (m + p) = (n + m) + p.
+
+Theorem plus_assoc''' : forall n m p : nat, P_pa n m p.
+Proof.
+  intros.
+  generalize dependent n.
+  apply nat_ind. reflexivity.
+  intros. unfold P_pa in *.
+  simpl. f_equal. assumption.
+Qed.
+
+Definition P_pc (n m:nat) : Prop := n + m = m + n.
+
+Theorem plus_comm''' : forall n m : nat, P_pc n m.
+Proof.
+  intros.
+  generalize dependent n.
+  apply nat_ind.
+    unfold P_pc. rewrite plus_0_r. reflexivity.
+  intros. unfold P_pc in *.
+  simpl. rewrite H. apply plus_n_Sm.
+Qed.
 
 
 (** ** Generalizing Inductions. *)
@@ -837,7 +926,26 @@ Check le_ind.
            ________________________________________________
 
 *)
-(** [] *)
+
+Inductive foo'' (X : Set) (Y : Set) : Set :=
+  | foo1 : X -> foo'' X Y
+  | foo2 : Y -> foo'' X Y
+  | foo3 : foo'' X Y -> foo'' X Y.
+
+Definition foo''_ind' : forall (X Y : Set) (P : foo'' X Y -> Prop),
+  (forall x : X, P (foo1 X Y x)) ->
+  (forall y : Y, P (foo2 X Y y)) ->
+  (forall f : foo'' X Y, P f -> P (foo3 X Y f)) ->
+  forall f: foo'' X Y, P f.
+Proof.
+  intros.
+  induction f; auto.
+Defined.
+
+Example foo''_ex1 : forall X Y P, foo''_ind X Y P = foo''_ind' X Y P.
+Proof.
+  intros. reflexivity.
+Qed.
 
 (** **** Exercise: 2 stars, optional (bar_ind_principle) *)
 (** Consider the following induction principle:
@@ -854,7 +962,26 @@ Check le_ind.
      | bar3 : ________________________________________.
 
 *)
-(** [] *)
+
+Inductive bar' : Set :=
+  | bar1 : nat -> bar'
+  | bar2 : bar' -> bar'
+  | bar3 : bool -> bar' -> bar'.
+
+Definition bar'_ind' : forall P : bar' -> Prop,
+  (forall n : nat, P (bar1 n)) ->
+  (forall b : bar', P b -> P (bar2 b)) ->
+  (forall (b : bool) (b0 : bar'), P b0 -> P (bar3 b b0)) ->
+  forall b : bar', P b.
+Proof.
+  intros.
+  induction b; auto.
+Defined.
+
+Example bar'_ex1 : forall P, bar'_ind P = bar'_ind' P.
+Proof.
+  intros. reflexivity.
+Qed.
 
 (** **** Exercise: 2 stars, optional (no_longer_than_ind) *)
 (** Given the following inductively defined proposition:
@@ -878,7 +1005,31 @@ Check le_ind.
            ____________________
 
 *)
-(** [] *)
+
+Inductive no_longer_than (X : Set) : (list X) -> nat -> Prop :=
+  | nlt_nil  : forall n, no_longer_than X [] n
+  | nlt_cons : forall x l n, no_longer_than X l n ->
+                             no_longer_than X (x::l) (S n)
+  | nlt_succ : forall l n, no_longer_than X l n ->
+                           no_longer_than X l (S n).
+
+Definition no_longer_than_ind' : forall (X : Set) (P : list X -> nat -> Prop),
+  (forall n : nat, P [] n) ->
+  (forall (x : X) (l : list X) (n : nat),
+    no_longer_than X l n -> P l n -> P (x :: l) (S n)) ->
+  (forall (l : list X) (n : nat),
+    no_longer_than X l n -> P l n -> P l (S n)) ->
+  forall (l : list X) (n : nat), no_longer_than X l n -> P l n.
+Proof.
+  intros.
+  induction H2; auto.
+Defined.
+
+Example no_longer_than_ex1 : forall X P,
+  no_longer_than_ind X P = no_longer_than_ind' X P.
+Proof.
+  intros. reflexivity.
+Qed.
 
 
 (* ##################################################### *)
@@ -921,16 +1072,40 @@ Check eq'_ind.
 (** **** Exercise: 1 star, optional (and_ind_principle) *)
 (** See if you can predict the induction principle for conjunction. *)
 
-(* Check and_ind. *)
-(** [] *)
+Definition and_ind' : forall (P Q : Prop) (A : and P Q -> Prop),
+  (forall (p : P) (q : Q), A (conj P Q p q)) ->
+  forall a : and P Q, A a.
+Proof.
+  intros.
+  destruct a.
+  apply H.
+Defined.
+
+Example and_ind_ex1 : forall P Q P0 (A : and P Q -> Prop),
+  and_ind P Q P0 = and_ind' P Q (fun _ => P0).
+Proof.
+  intros. reflexivity.
+Qed.
 
 (** **** Exercise: 1 star, optional (or_ind_principle) *)
 (** See if you can predict the induction principle for disjunction. *)
 
-(* Check or_ind. *)
-(** [] *)
+Definition or_ind' : forall (P Q : Prop) (O : or P Q -> Prop),
+  (forall (p : P), O (or_introl P Q p)) ->
+  (forall (q : Q), O (or_intror P Q q)) ->
+  forall o : or P Q, O o.
+Proof.
+  intros.
+  destruct o.
+  apply H.
+  apply H0.
+Defined.
 
-Check and_ind.
+Example or_ind_ex1 : forall P Q P0 (O : or P Q -> Prop),
+  or_ind P Q P0 = or_ind' P Q (fun _ => P0).
+Proof.
+  intros. reflexivity.
+Qed.
 
 (** From the inductive definition of the proposition [and P Q]
      Inductive and (P Q : Prop) : Prop :=
@@ -967,8 +1142,15 @@ Check and_ind.
 (** **** Exercise: 1 star, optional (False_ind_principle) *)
 (** Can you predict the induction principle for falsehood? *)
 
-(* Check False_ind. *)
-(** [] *)
+Definition False_ind' : forall P : Prop, False -> P.
+Proof.
+  intros. destruct H.
+Defined.
+
+Example False_ind_ex1 : False_ind = False_ind'.
+Proof.
+  intros. reflexivity.
+Qed.
 
 (** Here's the induction principle that Coq generates for existentials: *)
 
