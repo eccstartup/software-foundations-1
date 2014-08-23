@@ -51,8 +51,8 @@ Proof.
   Case "n = 0".
   simpl. apply ev_0.
   Case "n = S n'".
-  simpl. apply ev_SS. assumption.  Qed.
-(** [] *)
+  simpl. apply ev_SS. assumption.
+Qed.
 
 
 (** *** Discussion: Computational vs. Inductive Definitions *)
@@ -146,7 +146,6 @@ Proof.
   rewrite plus_comm.
   apply ev_SS. auto.
 Qed.
-(** [] *)
 
 
 (* ##################################################### *)
@@ -296,7 +295,6 @@ Proof.
     rewrite mult_comm. apply IHbeautiful1.
     rewrite mult_comm. apply IHbeautiful2.
 Qed.
-(** [] *)
 
 (** **** Exercise: 3 stars (b_timesm) *)
 Theorem b_timesm: forall n m, beautiful n -> beautiful (m*n).
@@ -315,7 +313,6 @@ Proof.
   apply H.
   apply IHm.
 Qed.
-(** [] *)
 
 
 (* ####################################################### *)
@@ -427,7 +424,6 @@ Proof.
     apply g_plus5. apply H0.
   apply g_plus5. apply IHgorgeous. apply H0.
 Qed.
-(** [] *)
 
 (** **** Exercise: 3 stars, advanced (beautiful__gorgeous) *)
 Theorem beautiful__gorgeous : forall n, beautiful n -> gorgeous n.
@@ -442,7 +438,6 @@ Proof.
   assumption.
   assumption.
 Qed.
-(** [] *)
 
 (** **** Exercise: 3 stars, optional (g_times2) *)
 (** Prove the [g_times2] theorem below without using [gorgeous__beautiful].
@@ -465,9 +460,6 @@ Proof.
    apply gorgeous_sum. apply H.
    apply g_plus5. rewrite plus_0_r. apply H.
 Qed.
-(** [] *)
-
-
 
 
 (* ####################################################### *)
@@ -552,7 +544,6 @@ Theorem even5_nonsense :
 Proof.
   intros. simpl. inversion H. inversion H1. inversion H3.
 Qed.
-(** [] *)
 
 (** **** Exercise: 3 stars, advanced (ev_ev__ev) *)
 (** Finding the appropriate thing to do induction on is a
@@ -567,7 +558,6 @@ Proof.
   repeat (rewrite plus_Sn_m in H).
   inversion H. auto.
 Qed.
-(** [] *)
 
 (** **** Exercise: 3 stars, optional (ev_plus_plus) *)
 (** Here's an exercise that just requires applying existing lemmas.  No
@@ -587,10 +577,6 @@ Proof.
   rewrite <- double_plus.
   apply double_even.
 Qed.
-(** [] *)
-
-
-
 
 
 (* ####################################################### *)
@@ -693,7 +679,6 @@ Proof.
   rewrite <- rev_snoc.
   f_equal.
 Qed.
-(** [] *)
 
 (** **** Exercise: 5 stars, optional (palindrome_converse) *)
 (** Using your definition of [pal] from the previous exercise, prove
@@ -772,7 +757,6 @@ Inductive next_even (n:nat) : nat -> Prop :=
 Inductive total_relation : nat -> nat -> Prop :=
   | tr_lte m n : m <= n -> total_relation m n
   | tr_gt m n : n < m -> total_relation m n.
-(** [] *)
 
 (** **** Exercise: 2 stars (empty_relation) *)
 (** Define an inductive binary relation [empty_relation] (on numbers)
@@ -780,7 +764,6 @@ Inductive total_relation : nat -> nat -> Prop :=
 
 Inductive empty_relation : nat -> nat -> Prop :=
   | lt_and_gt m n : m < n -> n < m -> empty_relation m n.
-(** [] *)
 
 (** **** Exercise: 2 stars, optional (le_exercises) *)
 (** Here are a number of facts about the [<=] and [<] relations that
@@ -907,8 +890,6 @@ Proof.
   rewrite H in H0.
   inversion H0.
 Qed.
-(** [] *)
-
 
 (** **** Exercise: 3 stars (R_provability2) *)
 Module R.
@@ -1130,8 +1111,6 @@ Proof.
   rewrite H0 in H. assumption.
 Qed.
 
-(** [] *)
-
 (* ##################################################### *)
 (** One more quick digression, for adventurous souls: if we can define
     parameterized propositions using [Definition], then can we also
@@ -1155,7 +1134,5 @@ Example true_upto_n_example :
     (true_upto_n__true_everywhere 3 (fun n => even n))
   = (even 3 -> even 2 -> even 1 -> forall m : nat, even m).
 Proof. reflexivity.  Qed.
-(** [] *)
-
 
 (* $Date: 2014-06-05 07:22:21 -0400 (Thu, 05 Jun 2014) $ *)

@@ -115,8 +115,8 @@ Proof.
     SCase "c = true".
     reflexivity.
     SCase "c = false".
-    rewrite <- H. simpl. reflexivity.  Qed.
-(** [] *)
+    rewrite <- H. simpl. reflexivity.
+Qed.
 
 (** There are no hard and fast rules for how proofs should be
     formatted in Coq -- in particular, where lines should be broken
@@ -265,8 +265,8 @@ Proof.
   Case "n = 0".
   reflexivity.
   Case "n = S n'".
-  simpl. rewrite IHn'. reflexivity.  Qed.
-(** [] *)
+  simpl. rewrite IHn'. reflexivity.
+Qed.
 
 (** **** Exercise: 2 stars (double_plus) *)
 
@@ -286,8 +286,8 @@ Proof.
   Case "n = 0".
   reflexivity.
   Case "n = S n'".
-  simpl. rewrite <- plus_n_Sm. rewrite IHn'. reflexivity.  Qed.
-(** [] *)
+  simpl. rewrite <- plus_n_Sm. rewrite IHn'. reflexivity.
+Qed.
 
 
 (** **** Exercise: 1 star (destruct_induction) *)
@@ -301,7 +301,6 @@ Proof.
    assumes that the recursive case is true, with the goal to prove that the
    constructor itself is true.
 *)
-(** [] *)
 
 
 (* ###################################################################### *)
@@ -416,8 +415,8 @@ Proof.
   Case "n = 0".
   rewrite mult_0_r. reflexivity.
   Case "n = S n'".
-  simpl. rewrite <- IHn'. rewrite mult_plus. reflexivity.  Qed.
-(** [] *)
+  simpl. rewrite <- IHn'. rewrite mult_plus. reflexivity.
+Qed.
 
 (** **** Exercise: 2 stars, optional (evenb_n__oddb_Sn) *)
 
@@ -430,8 +429,8 @@ Proof.
   Case "n = 0".
   reflexivity.
   Case "n = S n'".
-  simpl negb. rewrite IHn'. rewrite negb_involutive. reflexivity.  Qed.
-(** [] *)
+  simpl negb. rewrite IHn'. rewrite negb_involutive. reflexivity.
+Qed.
 
 (* ###################################################################### *)
 (** * More Exercises *)
@@ -517,8 +516,8 @@ Proof.
   Case "n = 0".
   reflexivity.
   Case "n = S n'".
-  simpl. rewrite IHn'. rewrite mult_plus_distr_r. reflexivity.  Qed.
-(** [] *)
+  simpl. rewrite IHn'. rewrite mult_plus_distr_r. reflexivity.
+Qed.
 
 (** **** Exercise: 2 stars, optional (beq_nat_refl) *)
 (** Prove the following theorem.  Putting [true] on the left-hand side
@@ -534,8 +533,8 @@ Proof.
   Case "n = 0".
   reflexivity.
   Case "n = S n'".
-  simpl. rewrite IHn'. reflexivity.  Qed.
-(** [] *)
+  simpl. rewrite IHn'. reflexivity.
+Qed.
 
 (** **** Exercise: 2 stars, optional (plus_swap') *)
 (** The [replace] tactic allows you to specify a particular subterm to
@@ -564,8 +563,8 @@ Proof.
   intros. rewrite plus_assoc.
   replace (n + m) with (m + n).
   rewrite plus_assoc. reflexivity.
-  rewrite plus_comm. reflexivity.  Qed.
-(** [] *)
+  rewrite plus_comm. reflexivity.
+Qed.
 
 
 (** **** Exercise: 3 stars (binary_commute) *)
@@ -609,8 +608,8 @@ Proof.
   Case "n = Twice n'".
   reflexivity.
   Case "n = More n''".
-  simpl. rewrite IHn''. rewrite <- plus_n_Sm. reflexivity.  Qed.
-(** [] *)
+  simpl. rewrite IHn''. rewrite <- plus_n_Sm. reflexivity.
+Qed.
 
 
 (** **** Exercise: 5 stars, advanced (binary_inverse) *)
@@ -669,9 +668,9 @@ Proof.
   intros b. induction b as [| b' | b''].
   Case "b = Zero". reflexivity.
   Case "b = Twice b'". reflexivity.
-  Case "b = More b''". reflexivity.  Qed.
+  Case "b = More b''". reflexivity.
+Qed.
 
-(** [] *)
 
 (* ###################################################################### *)
 (** * Advanced Material *)

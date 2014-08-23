@@ -210,8 +210,8 @@ Theorem proj2 : forall P Q : Prop,
 Proof.
   intros.
   inversion H.
-  apply H1.  Qed.
-(** [] *)
+  apply H1.
+Qed.
 
 Theorem and_commut : forall P Q : Prop,
   P /\ Q -> Q /\ P.
@@ -234,9 +234,8 @@ Proof.
   intros P Q R H.
   inversion H as [HP [HQ HR]].
   split.
-    split. apply HP. apply HQ. apply HR.  Qed.
-(** [] *)
-
+    split. apply HP. apply HQ. apply HR.
+Qed.
 
 
 (* ###################################################### *)
@@ -290,8 +289,6 @@ Proof.
 (** Hint: If you have an iff hypothesis in the context, you can use
     [inversion] to break it into two separate implications.  (Think
     about why this works.) *)
-(** [] *)
-
 
 
 (** Some of Coq's tactics treat [iff] statements specially, thus
@@ -409,22 +406,19 @@ Theorem or_distributes_over_and_2_alt : forall P Q R : Prop,
 Proof.
   intros. apply truth in H. assumption.
 Qed.
-(** [] *)
 
 (** **** Exercise: 1 star, optional (or_distributes_over_and) *)
 Theorem or_distributes_over_and : forall P Q R : Prop,
   P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
-Proof.
-  intros. split.
-    intros. split.
-      inversion H. left. assumption.
-      inversion H0. right. assumption.
-      inversion H. left. assumption.
-      inversion H0. right. assumption.
-    intros.
-      apply truth in H. assumption.
+Proof with assumption.
+  intros. split; intros.
+    split.
+      inversion H. left...
+      inversion H0. right...
+      inversion H. left...
+      inversion H0. right...
+    apply truth in H...
 Qed.
-(** [] *)
 
 (* ################################################### *)
 (** ** Relating [/\] and [\/] with [andb] and [orb] (advanced) *)
@@ -561,7 +555,6 @@ Proof.
     trivial to give evidence.) *)
 
 Inductive True : Prop := tt.
-(** [] *)
 
 (** However, unlike [False], which we'll use extensively, [True] is
     used fairly rarely. By itself, it is trivial (and therefore
@@ -689,7 +682,9 @@ Qed.
 
 Theorem classic_excluded_middle : classic -> excluded_middle.
 Proof.
-  compute. intros.
+  compute in *. intros.
+  right. apply (H (P -> False)).
+  intros. contradiction H0. intros.
 Abort.
 
 Theorem em_de_morgan : excluded_middle -> de_morgan_not_and_not.
@@ -776,7 +771,6 @@ Proof.
     reflexivity.
     apply IHn. unfold not in *. auto.
 Qed.
-(** [] *)
 
 (** **** Exercise: 2 stars, optional (beq_nat_false) *)
 Theorem beq_nat_false : forall n m,
@@ -791,10 +785,5 @@ Proof.
     inversion H0.
     specialize (IHn m). auto.
 Qed.
-(** [] *)
-
-
-
-
 
 (* $Date: 2014-06-05 07:22:21 -0400 (Thu, 05 Jun 2014) $ *)

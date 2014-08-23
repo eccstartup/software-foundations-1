@@ -169,8 +169,7 @@ Inductive grumble (X:Type) : Type :=
     X - [e bool true]
     X - [e mumble (b c 0)]
       - [e bool (b c 0)]
-      - [c]
-[] *)
+      - [c] *)
 
 
 (** **** Exercise: 2 stars (baz_num_elts) *)
@@ -181,8 +180,7 @@ Inductive baz : Type :=
    | y : baz -> bool -> baz.
 
 (** How _many_ elements does the type [baz] have?
-None.
-[] *)
+None. *)
 
 End MumbleBaz.
 
@@ -415,8 +413,8 @@ Proof.
   Case "nil".
   reflexivity.
   Case "cons".
-  simpl. rewrite IHxs. reflexivity.  Qed.
-(** [] *)
+  simpl. rewrite IHxs. reflexivity.
+Qed.
 
 (* ###################################################### *)
 (** ** Polymorphic Pairs *)
@@ -504,10 +502,9 @@ Fixpoint split
       end
   end.
 
-Example test_split:
-  split [(1,false);(2,false)] = ([1;2],[false;false]).
+Example test_split: split [(1,false);(2,false)] = ([1;2],[false;false]).
 Proof. reflexivity.  Qed.
-(** [] *)
+
 
 (* ###################################################### *)
 (** ** Polymorphic Options *)
@@ -558,10 +555,9 @@ Definition hd_opt {X : Type} (l : list X)  : option X :=
 Check @hd_opt.
 
 Example test_hd_opt1 :  hd_opt [1;2] = Some 1.
-Proof. reflexivity.  Qed.
+Proof. reflexivity. Qed.
 Example test_hd_opt2 :   hd_opt  [[1];[2]]  = Some [1].
-Proof. reflexivity.  Qed.
-(** [] *)
+Proof. reflexivity. Qed.
 
 (* ###################################################### *)
 (** * Functions as Data *)
@@ -667,9 +663,7 @@ Proof.
 Theorem curry_uncurry : forall (X Y Z : Type)
                                (f : (X * Y) -> Z) (p : X * Y),
   prod_uncurry (prod_curry f) p = f p.
-Proof.
-  intros. destruct p. reflexivity.  Qed.
-(** [] *)
+Proof. intros. destruct p. reflexivity.  Qed.
 
 (* ###################################################### *)
 (** ** Filter *)
@@ -692,7 +686,7 @@ Fixpoint filter {X:Type} (test: X->bool) (l:list X)
     even members of [l]. *)
 
 Example test_filter1: filter evenb [1;2;3;4] = [2;4].
-Proof. reflexivity.  Qed.
+Proof. reflexivity. Qed.
 
 (** *** *)
 Definition length_is_1 {X : Type} (l : list X) : bool :=
@@ -702,7 +696,7 @@ Example test_filter2:
     filter length_is_1
            [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
   = [ [3]; [4]; [8] ].
-Proof. reflexivity.  Qed.
+Proof. reflexivity. Qed.
 
 (** *** *)
 
@@ -766,7 +760,6 @@ Proof. reflexivity.  Qed.
 Example test_filter_even_gt7_2 :
   filter_even_gt7 [5;2;6;19;129] = [].
 Proof. reflexivity.  Qed.
-(** [] *)
 
 (** **** Exercise: 3 stars (partition) *)
 (** Use [filter] to write a Coq function [partition]:
@@ -789,7 +782,6 @@ Example test_partition1: partition oddb [1;2;3;4;5] = ([1;3;5], [2;4]).
 Proof. reflexivity.  Qed.
 Example test_partition2: partition (fun x => false) [5;9;0] = ([], [5;9;0]).
 Proof. reflexivity.  Qed.
-(** [] *)
 
 (* ###################################################### *)
 (** ** Map *)
@@ -851,8 +843,8 @@ Proof.
   Case "nil".
   reflexivity.
   Case "cons".
-  simpl. rewrite <- IHxs. rewrite map_snoc. reflexivity.  Qed.
-(** [] *)
+  simpl. rewrite <- IHxs. rewrite map_snoc. reflexivity.
+Qed.
 
 (** **** Exercise: 2 stars (flat_map) *)
 (** The function [map] maps a [list X] to a [list Y] using a function
@@ -895,7 +887,7 @@ Definition option_map {X Y : Type} (f : X -> Y) (xo : option X)
     type parameters where necessary and use Coq to check that you've
     done so correctly.  (This exercise is not to be turned in; it is
     probably easiest to do it on a _copy_ of this file that you can
-    throw away afterwards.)  [] *)
+    throw away afterwards.) *)
 
 (* ###################################################### *)
 (** ** Fold *)
@@ -1007,9 +999,7 @@ Proof. reflexivity. Qed.
 
 Theorem override_example : forall (b:bool),
   (override (constfun b) 3 true) 2 = b.
-Proof.
-  intros. compute. reflexivity.  Qed.
-(** [] *)
+Proof. intros. compute. reflexivity.  Qed.
 
 (** We'll use function overriding heavily in parts of the rest of the
     course, and we will end up needing to know quite a bit about its
@@ -1075,8 +1065,8 @@ Theorem override_neq : forall (X:Type) x1 x2 k1 k2 (f : nat->X),
   beq_nat k2 k1 = false ->
   (override f k2 x2) k1 = x1.
 Proof.
-  intros. unfold override. rewrite H0. rewrite H. reflexivity.  Qed.
-(** [] *)
+  intros. unfold override. rewrite H0. rewrite H. reflexivity.
+Qed.
 
 (** As the inverse of [unfold], Coq also provides a tactic
     [fold], which can be used to "unexpand" a definition.  It is used
@@ -1101,11 +1091,9 @@ Theorem fold_length_correct : forall X (l : list X),
   fold_length l = length l.
 Proof.
   intros. induction l as [| x xs].
-  Case "nil".
-  reflexivity.
-  Case "cons".
-  simpl. rewrite <- IHxs. reflexivity.  Qed.
-(** [] *)
+  Case "nil".  reflexivity.
+  Case "cons". simpl. rewrite <- IHxs. reflexivity.
+Qed.
 
 (** **** Exercise: 3 stars (fold_map) *)
 (** We can also define [map] in terms of [fold].  Finish [fold_map]
@@ -1124,7 +1112,7 @@ Proof.
   Case "nil".
   reflexivity.
   Case "cons".
-  simpl. rewrite IHxs. reflexivity.  Qed.
-(** [] *)
+  simpl. rewrite IHxs. reflexivity.
+Qed.
 
 (* $Date: 2013-09-26 14:40:26 -0400 (Thu, 26 Sep 2013) $ *)

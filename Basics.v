@@ -244,7 +244,6 @@ Example test_nandb3:               (nandb false true) = true.
 Proof. reflexivity. Qed.
 Example test_nandb4:               (nandb true true) = false.
 Proof. reflexivity. Qed.
-(** [] *)
 
 (** **** Exercise: 1 star (andb3) *)
 (** Do the same for the [andb3] function below. This function should
@@ -495,7 +494,6 @@ Example test_factorial1:          (factorial 3) = 6.
 Proof. reflexivity.  Qed.
 Example test_factorial2:          (factorial 5) = (mult 10 12).
 Proof. reflexivity.  Qed.
-(** [] *)
 
 (** We can make numerical expressions a little easier to read and
     write by introducing "notations" for addition, multiplication, and
@@ -581,7 +579,6 @@ Example test_blt_nat2:             (blt_nat 2 4) = true.
 Proof. reflexivity.  Qed.
 Example test_blt_nat3:             (blt_nat 4 2) = false.
 Proof. reflexivity.  Qed.
-(** [] *)
 
 (* ###################################################################### *)
 (** * Proof by Simplification *)
@@ -713,8 +710,8 @@ Theorem plus_id_exercise : forall n m o : nat,
 Proof.
   intros n m o H H0.
   rewrite H. rewrite H0.
-  reflexivity. Qed.
-(** [] *)
+  reflexivity.
+Qed.
 
 (** As we've seen in earlier examples, the [Admitted] command
     tells Coq that we want to skip trying to prove this theorem and
@@ -744,9 +741,8 @@ Theorem mult_S_1 : forall n m : nat,
   m * (1 + n) = m * m.
 Proof.
   intros n m H.
-  rewrite H. simpl. reflexivity. Qed.
-(** [] *)
-
+  rewrite H. simpl. reflexivity.
+Qed.
 
 
 (* ###################################################################### *)
@@ -832,8 +828,8 @@ Theorem zero_nbeq_plus_1 : forall n : nat,
 Proof.
   intros n. destruct n as [| n'].
     reflexivity.
-    reflexivity.  Qed.
-(** [] *)
+    reflexivity.
+Qed.
 
 (* ###################################################################### *)
 (** * More Exercises *)
@@ -963,7 +959,6 @@ Example test_binn5: binn (binc (Twice (Twice (More Zero)))) =
                     S (binn (Twice (Twice (More Zero)))).
 Proof. simpl. reflexivity.  Qed.
 
-(** [] *)
 
 (* ###################################################################### *)
 (** * Optional Material *)

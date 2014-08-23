@@ -67,9 +67,7 @@ Theorem silly_ex :
      (forall n, evenb n = true -> oddb (S n) = true) ->
      evenb 3 = true ->
      oddb 4 = true.
-Proof.
-  intros. apply H. apply H0.  Qed.
-(** [] *)
+Proof. intros. apply H. apply H0. Qed.
 
 (** To use the [apply] tactic, the (conclusion of the) fact
     being applied must match the goal _exactly_ -- for example, [apply]
@@ -106,9 +104,7 @@ Proof.
 Theorem rev_exercise1 : forall (l l' : list nat),
      l = rev l' ->
      l' = rev l.
-Proof.
-  intros. rewrite H. symmetry. apply rev_involutive.  Qed.
-(** [] *)
+Proof. intros. rewrite H. symmetry. apply rev_involutive.  Qed.
 
 (** **** Exercise: 1 star, optional (apply_rewrite) *)
 (** Briefly explain the difference between the tactics [apply] and
@@ -119,7 +115,6 @@ Apply seems to be like using another theorem as if it were a function, so that
 if it's result is Qed, then the current branch is proven.  rewrite rewrites
 terms, but does not resolve the proof obligation.
 *)
-(** [] *)
 
 
 (* ###################################################### *)
@@ -176,9 +171,7 @@ Example trans_eq_exercise : forall (n m o p : nat),
      m = (minustwo o) ->
      (n + p) = m ->
      (n + p) = (minustwo o).
-Proof.
-  intros. rewrite H0. apply H.  Qed.
-(** [] *)
+Proof. intros. rewrite H0. apply H.  Qed.
 
 
 (* ###################################################### *)
@@ -262,30 +255,24 @@ Example sillyex1 : forall (X : Type) (x y z : X) (l j : list X),
      x :: y :: l = z :: j ->
      y :: l = x :: j ->
      x = y.
-Proof.
-  intros. inversion H0. reflexivity.  Qed.
-(** [] *)
+Proof. intros. inversion H0. reflexivity.  Qed.
 
 Theorem silly6 : forall (n : nat),
      S n = O ->
      2 + 2 = 5.
-Proof.
-  intros n contra. inversion contra. Qed.
+Proof. intros n contra. inversion contra. Qed.
 
 Theorem silly7 : forall (n m : nat),
      false = true ->
      [n] = [m].
-Proof.
-  intros n m contra. inversion contra.  Qed.
+Proof. intros n m contra. inversion contra.  Qed.
 
 (** **** Exercise: 1 star (sillyex2) *)
 Example sillyex2 : forall (X : Type) (x y z : X) (l j : list X),
      x :: y :: l = [] ->
      y :: l = z :: j ->
      x = z.
-Proof.
-  intros. inversion H.  Qed.
-(** [] *)
+Proof. intros. inversion H.  Qed.
 
 (** While the injectivity of constructors allows us to reason
     [forall (n m : nat), S n = S m -> n = m], the reverse direction of
@@ -316,8 +303,8 @@ Theorem beq_nat_0_r : forall n,
 Proof.
   intros. destruct n as [| n'].
     reflexivity.
-    inversion H.  Qed.
-(** [] *)
+    inversion H.
+Qed.
 
 
 (* ###################################################### *)
@@ -389,8 +376,9 @@ Proof.
         rewrite <- plus_n_Sm in H.
         rewrite <- plus_n_Sm in H.
         inversion H.
-        apply IHn' in H1. rewrite H1. reflexivity.  Qed.
-(** [] *)
+        apply IHn' in H1. rewrite H1. reflexivity.
+Qed.
+
 
 (* ###################################################### *)
 (** * Varying the Induction Hypothesis *)
@@ -541,8 +529,9 @@ Proof.
     reflexivity. inversion H.
   Case "n = S n'".
   intros. destruct m as [| m'].
-    inversion H. apply IHn' in H. rewrite H. reflexivity.  Qed.
-(** [] *)
+    inversion H. apply IHn' in H. rewrite H. reflexivity.
+Qed.
+
 
 (** **** Exercise: 2 stars, advanced (beq_nat_true_informal) *)
 (** Give a careful informal proof of [beq_nat_true], being as explicit
@@ -724,8 +713,8 @@ Proof.
   destruct n as [| n'].
     intros. inversion H.
     intros. inversion H.
-      rewrite H1. apply IHxs. simpl. rewrite H1. reflexivity.  Qed.
-(** [] *)
+      rewrite H1. apply IHxs. simpl. rewrite H1. reflexivity.
+Qed.
 
 (** **** Exercise: 3 stars, advanced, optional (index_after_last_informal) *)
 (** Write an informal proof corresponding to your Coq proof
@@ -755,8 +744,8 @@ Proof.
     reflexivity.
     simpl. inversion H.
   Case "l = x :: xs".
-  intros. apply length_snoc'. apply H.  Qed.
-(** [] *)
+  intros. apply length_snoc'. apply H.
+Qed.
 
 (** **** Exercise: 3 stars, optional (app_length_cons) *)
 (** Prove this by induction on [l1], without using [app_length]. *)
@@ -780,8 +769,8 @@ Proof.
   intros. simpl. destruct n as [| n'].
     inversion H.
     apply eq_remove_S. apply IHys. simpl in H.
-      inversion H. reflexivity.  Qed.
-(** [] *)
+      inversion H. reflexivity.
+Qed.
 
 (** **** Exercise: 4 stars, optional (app_length_twice) *)
 (** Prove this by induction on [l], without using app_length. *)
@@ -817,8 +806,8 @@ Proof.
         apply eq_remove_S.
         apply app_length_cons_r.
         apply eq_remove_S.
-        apply IHl. apply H0.  Qed.
-(** [] *)
+        apply IHl. apply H0.
+Qed.
 
 
 (** **** Exercise: 3 stars, optional (double_induction) *)
@@ -840,8 +829,8 @@ Proof.
       apply H1. apply IHn'.
     intros. induction n as [| n'].
       apply H0. apply IHm'. apply H. apply H0. apply H1. apply H2.
-      apply H2. apply IHm'. apply H. apply H0. apply H1. apply H2.  Qed.
-(** [] *)
+      apply H2. apply IHm'. apply H. apply H0. apply H1. apply H2.
+Qed.
 
 
 (* ###################################################### *)
@@ -887,9 +876,8 @@ Proof.
 Theorem override_shadow : forall (X:Type) x1 x2 k1 k2 (f : nat->X),
   (override (override f k1 x2) k1 x1) k2 = (override f k1 x1) k2.
 Proof.
-  intros. unfold override. destruct (beq_nat k1 k2).
-    reflexivity. reflexivity.  Qed.
-(** [] *)
+  intros. unfold override. destruct (beq_nat k1 k2); reflexivity.
+Qed.
 
 (** **** Exercise: 3 stars, optional (combine_split) *)
 (** Complete the proof below *)
@@ -911,8 +899,8 @@ Proof.
           intros. inversion H.
           intros. rewrite IHxs.
             inversion H. reflexivity.
-            inversion H. reflexivity.  Qed.
-(** [] *)
+            inversion H. reflexivity.
+Qed.
 
 (** Sometimes, doing a [destruct] on a compound expression (a
     non-variable) will erase information we need to complete a proof. *)
@@ -990,8 +978,8 @@ Proof.
       destruct (f true) eqn:Heqe2.
         apply Heqe2.
         apply Heqe.
-      rewrite Heqe. apply Heqe.  Qed.
-(** [] *)
+      rewrite Heqe. apply Heqe.
+Qed.
 
 (** **** Exercise: 2 stars (override_same) *)
 Theorem override_same : forall (X:Type) x1 k1 k2 (f : nat->X),
@@ -999,8 +987,9 @@ Theorem override_same : forall (X:Type) x1 k1 k2 (f : nat->X),
 Proof.
   intros. unfold override. destruct (beq_nat k1 k2) eqn:Heqe.
     rewrite <- H. apply beq_nat_true in Heqe.
-      inversion Heqe. reflexivity. reflexivity.  Qed.
-(** [] *)
+      inversion Heqe. reflexivity. reflexivity.
+Qed.
+
 
 (* ################################################################## *)
 (** * Review *)
@@ -1093,8 +1082,8 @@ Proof.
   Case "n = S n'".
     destruct m as [| m'].
       compute. reflexivity.
-      apply IHn'.  Qed.
-(** [] *)
+      apply IHn'.
+Qed.
 
 (** **** Exercise: 3 stars, advanced, optional (beq_nat_sym_informal) *)
 (** Give an informal proof of this lemma that corresponds to your
@@ -1114,8 +1103,8 @@ Theorem beq_nat_trans : forall n m p,
   beq_nat n p = true.
 Proof.
   intros. apply beq_nat_true in H. apply beq_nat_true in H0.
-    rewrite H. rewrite <- H0. symmetry. apply beq_nat_refl.  Qed.
-(** [] *)
+    rewrite H. rewrite <- H0. symmetry. apply beq_nat_refl.
+Qed.
 
 (** **** Exercise: 3 stars, advanced (split_combine) *)
 (** We have just proven that for all lists of pairs, [combine] is the
@@ -1141,8 +1130,6 @@ Proof.
   inversion H. reflexivity.
 Qed.
 
-(** [] *)
-
 (** **** Exercise: 3 stars (override_permute) *)
 Theorem override_permute : forall (X:Type) x1 x2 k1 k2 k3 (f : nat->X),
   beq_nat k2 k1 = false ->
@@ -1150,8 +1137,8 @@ Theorem override_permute : forall (X:Type) x1 x2 k1 k2 k3 (f : nat->X),
 Proof.
   intros. unfold override. destruct (beq_nat k1 k3) eqn:Heqe.
   apply beq_nat_true in Heqe. rewrite <- Heqe. rewrite H. reflexivity.
-  destruct (beq_nat k2 k3) eqn:Heqe2. reflexivity. reflexivity.  Qed.
-(** [] *)
+  destruct (beq_nat k2 k3) eqn:Heqe2; reflexivity.
+Qed.
 
 (** **** Exercise: 3 stars, advanced (filter_exercise) *)
 (** This one is a bit challenging.  Pay attention to the form of your IH. *)
@@ -1168,8 +1155,8 @@ Proof.
   Case "l = S l'".
   simpl. intros. destruct (test y) eqn:Heqe.
     inversion H. rewrite <- H1. apply Heqe.
-    apply IHys in H. apply H.  Qed.
-(** [] *)
+    apply IHys in H. apply H.
+Qed.
 
 (** **** Exercise: 4 stars, advanced (forall_exists_challenge) *)
 (** Define two recursive [Fixpoints], [forallb] and [existsb].  The
@@ -1239,7 +1226,5 @@ Proof.
   unfold existsb', forallb.
   destruct (f x); reflexivity.
 Qed.
-
-(** [] *)
 
 (* $Date: 2014-02-04 07:15:43 -0500 (Tue, 04 Feb 2014) $ *)

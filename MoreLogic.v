@@ -114,7 +114,6 @@ Proof.
   intros. destruct H0.
   apply H0. auto.
 Qed.
-(** [] *)
 
 (** **** Exercise: 3 stars, optional (not_exists_dist) *)
 (** (The other direction of this theorem requires the classical "law
@@ -132,7 +131,6 @@ Proof.
   contradiction H0.
   exists x. assumption.
 Qed.
-(** [] *)
 
 (** **** Exercise: 2 stars (dist_exists_or) *)
 (** Prove that existential quantification distributes over
@@ -152,7 +150,7 @@ Proof.
   destruct H0. exists witness.
   right. assumption.
 Qed.
-(** [] *)
+
 
 (* ###################################################### *)
 (** * Evidence-carrying booleans. *)
@@ -260,11 +258,6 @@ Proof.
   intros. unfold override'.
   destruct (eq_nat_dec k1 k2); auto.
 Qed.
-(** [] *)
-
-
-
-
 
 
 (* ####################################################### *)
@@ -309,7 +302,6 @@ Proof.
     simpl. rewrite IHall.
     rewrite H. auto.
 Qed.
-(** [] *)
 
 (** **** Exercise: 4 stars, advanced (filter_challenge) *)
 (** One of the main purposes of Coq is to prove that programs match
@@ -393,8 +385,6 @@ Proof.
   - logic_puzzle IHin_order_merge.
 Qed.
 
-(** [] *)
-
 (** **** Exercise: 5 stars, advanced, optional (filter_challenge_2) *)
 (** A different way to formally characterize the behavior of [filter]
     goes like this: Among all subsequences of [l] with the property
@@ -459,7 +449,6 @@ Proof.
     try (apply le_succ);
     apply IHxs; assumption.
 Qed.
-(** [] *)
 
 (** **** Exercise: 4 stars, advanced (no_repeats) *)
 (** The following inductively defined proposition... *)
@@ -714,8 +703,6 @@ Proof.
   apply not_appears_in_app in H3.
   assumption.
 Qed.
-(** [] *)
-
 
 (** **** Exercise: 3 stars (nostutter) *)
 (** Formulating inductive definitions of predicates is an important

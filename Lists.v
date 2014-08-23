@@ -110,15 +110,15 @@ Proof.
 Theorem snd_fst_is_swap : forall (p : natprod),
   (snd p, fst p) = swap_pair p.
 Proof.
-  intros. destruct p as [n m]. simpl. reflexivity.  Qed.
-(** [] *)
+  intros. destruct p as [n m]. simpl. reflexivity.
+Qed.
 
 (** **** Exercise: 1 star, optional (fst_swap_is_snd) *)
 Theorem fst_swap_is_snd : forall (p : natprod),
   fst (swap_pair p) = snd p.
 Proof.
-  intros. destruct p as [n m]. simpl. reflexivity.  Qed.
-(** [] *)
+  intros. destruct p as [n m]. simpl. reflexivity.
+Qed.
 
 (* ###################################################### *)
 (** * Lists of Numbers *)
@@ -285,7 +285,6 @@ Example test_countoddmembers2:    countoddmembers [0;2;4] = 0.
 Proof. reflexivity.  Qed.
 Example test_countoddmembers3:    countoddmembers nil = 0.
 Proof. reflexivity.  Qed.
-(** [] *)
 
 (** **** Exercise: 3 stars, advanced (alternate) *)
 (** Complete the definition of [alternate], which "zips up" two lists
@@ -319,7 +318,7 @@ Example test_alternate3:        alternate [1;2;3] [4] = [1;4;2;3].
 Proof. reflexivity.  Qed.
 Example test_alternate4:        alternate [] [20;30] = [20;30].
 Proof. reflexivity.  Qed.
-(** [] *)
+
 
 (* ###################################################### *)
 (** ** Bags via Lists *)
@@ -382,7 +381,7 @@ Example test_member1:             member 1 [1;4;1] = true.
 Proof. reflexivity.  Qed.
 Example test_member2:             member 2 [1;4;1] = false.
 Proof. reflexivity.  Qed.
-(** [] *)
+
 
 (** **** Exercise: 3 stars, optional (bag_more_functions) *)
 (** Here are some more bag functions for you to practice with. *)
@@ -432,7 +431,7 @@ Example test_subset1:              subset [1;2] [2;1;4;1] = true.
 Proof. reflexivity.  Qed.
 Example test_subset2:              subset [1;2;2] [2;1;4;1] = false.
 Proof. reflexivity.  Qed.
-(** [] *)
+
 
 (** **** Exercise: 3 stars (bag_theorem) *)
 (** Write down an interesting theorem about bags involving the
@@ -449,8 +448,9 @@ Proof.
   Case "n = 0".
   reflexivity.
   Case "n = S n'".
-  simpl. rewrite <- beq_nat_refl. reflexivity.  Qed.
-(** [] *)
+  simpl. rewrite <- beq_nat_refl. reflexivity.
+Qed.
+
 
 (* ###################################################### *)
 (** * Reasoning About Lists *)
@@ -847,8 +847,9 @@ Proof.
         SSSCase "y = 0".
         simpl. rewrite IHxs. simpl. reflexivity.
         SSSCase "y = S y'".
-        simpl. rewrite IHxs. simpl. reflexivity.  Qed.
-(** [] *)
+        simpl. rewrite IHxs. simpl. reflexivity.
+Qed.
+
 
 (** **** Exercise: 2 stars (beq_natlist) *)
 (** Fill in the definition of [beq_natlist], which compares
@@ -883,8 +884,9 @@ Proof.
   Case "nil".
   reflexivity.
   Case "cons".
-  simpl. rewrite <- beq_nat_refl. rewrite IHxs. reflexivity.  Qed.
-(** [] *)
+  simpl. rewrite <- beq_nat_refl. rewrite IHxs. reflexivity.
+Qed.
+
 
 (* ###################################################### *)
 (** ** List Exercises, Part 2 *)
@@ -903,8 +905,8 @@ Proof.
   reflexivity.
   Case "cons".
   rewrite snoc_append.
-  rewrite app_assoc. reflexivity.  Qed.
-(** [] *)
+  rewrite app_assoc. reflexivity.
+Qed.
 
 (** **** Exercise: 3 stars, advanced (bag_proofs) *)
 (** Here are a couple of little theorems to prove about your
@@ -937,8 +939,8 @@ Proof.
     SCase "x = 0".
     simpl. rewrite ble_n_Sn. reflexivity.
     SCase "x = S x'".
-    simpl. rewrite IHxs. reflexivity.  Qed.
-(** [] *)
+    simpl. rewrite IHxs. reflexivity.
+Qed.
 
 (** **** Exercise: 3 stars, optional (bag_count_sum) *)
 (** Write down an interesting theorem about bags involving the
@@ -972,8 +974,8 @@ Proof.
     SCase "nil".
     simpl. rewrite plus_O_r. rewrite app_nil_end. reflexivity.
     SCase "cons".
-    simpl. rewrite <- IHxs. simpl. rewrite if_plus. reflexivity.  Qed.
-(** [] *)
+    simpl. rewrite <- IHxs. simpl. rewrite if_plus. reflexivity.
+Qed.
 
 (** **** Exercise: 4 stars, advanced (rev_injective) *)
 (** Prove that the [rev] function is injective, that is,
@@ -987,8 +989,8 @@ Theorem rev_injective : forall (l1 l2 : natlist),
   rev l1 = rev l2 -> l1 = l2.
 Proof.
   intros. rewrite <- rev_involutive. rewrite <- H.
-  rewrite rev_involutive. reflexivity.  Qed.
-(** [] *)
+  rewrite rev_involutive. reflexivity.
+Qed.
 
 
 (* ###################################################### *)
@@ -1084,7 +1086,7 @@ Proof. reflexivity.  Qed.
 
 Example test_hd_opt3 : hd_opt [5;6] = Some 5.
 Proof. reflexivity.  Qed.
-(** [] *)
+
 
 (** **** Exercise: 1 star, optional (option_elim_hd) *)
 (** This exercise relates your new [hd_opt] to the old [hd]. *)
@@ -1096,8 +1098,9 @@ Proof.
   Case "l = 0".
   reflexivity.
   Case "l = S l'".
-  reflexivity.  Qed.
-(** [] *)
+  reflexivity.
+Qed.
+
 
 (* ###################################################### *)
 (** * Dictionaries *)
@@ -1145,8 +1148,8 @@ Fixpoint find (key : nat) (d : dictionary) : natoption :=
 Theorem dictionary_invariant1' : forall (d : dictionary) (k v: nat),
   (find k (insert k v d)) = Some v.
 Proof.
-  intros. simpl. rewrite <- beq_nat_refl. reflexivity.  Qed.
-(** [] *)
+  intros. simpl. rewrite <- beq_nat_refl. reflexivity.
+Qed.
 
 (** **** Exercise: 1 star (dictionary_invariant2) *)
 (** Complete the following proof. *)
@@ -1158,9 +1161,8 @@ Proof.
   Case "empty".
   simpl. rewrite H. reflexivity.
   Case "d = S d'".
-  simpl. rewrite H. reflexivity.  Qed.
-(** [] *)
-
+  simpl. rewrite H. reflexivity.
+Qed.
 
 
 End Dictionary.
