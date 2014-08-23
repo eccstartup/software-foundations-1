@@ -1182,7 +1182,7 @@ Definition subst_equiv_property := forall i1 i2 a1 a2,
          (i1 ::= a1;; i2 ::= subst_aexp i1 a1 a2).
 
 (** *** *)
-(** Sadly, the property does _not_ always hold. 
+(** Sadly, the property does _not_ always hold.
 
     _Theorem_: It is not the case that, for all [i1], [i2], [a1],
     and [a2],

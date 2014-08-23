@@ -99,7 +99,7 @@ Qed.
 ]]
     mean? *)
 
-(* FILL IN HERE *)
+(* That there exists a natural number whose successor is beautiful. *)
 
 (*
 *)
