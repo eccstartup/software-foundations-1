@@ -1,9 +1,11 @@
-* Software Foundations
+# Software Foundations
 
 These files contain my solutions to the exercises found in the [Software
-Foundations online course](http://www.cis.upenn.edu/~bcpierce/sf).
+Foundations](http://www.cis.upenn.edu/~bcpierce/sf)  online course.
 
-* TODO
+# TODO
+
+Current progress:
 
 - [X] Preface
 - [X] Basics:        Functional Programming in Coq
