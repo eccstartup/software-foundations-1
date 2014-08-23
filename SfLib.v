@@ -163,7 +163,8 @@ Theorem multi_R : forall (X:Type) (R:relation X) (x y : X),
        R x y -> multi R x y.
 Proof.
   intros X R x y r.
-  apply multi_step with y. apply r. apply multi_refl.   Qed.
+  apply multi_step with y. apply r. apply multi_refl.
+Qed.
 
 Theorem multi_trans :
   forall (X:Type) (R: relation X) (x y z : X),
@@ -171,7 +172,11 @@ Theorem multi_trans :
       multi R y z ->
       multi R x z.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction H. assumption.
+  apply multi_step with y. assumption.
+  apply IHmulti. assumption.
+Qed.
 
 (**  Identifiers and polymorphic partial maps. *)
 
@@ -200,7 +205,10 @@ Qed.
 Lemma neq_id : forall (T:Type) x y (p q:T), x <> y ->
                (if eq_id_dec x y then p else q) = q.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct (eq_id_dec x y).
+  contradiction H. reflexivity.
+Qed.
 
 Definition partial_map (A:Type) := id -> option A.
 
