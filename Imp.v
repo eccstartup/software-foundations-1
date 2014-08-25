@@ -525,24 +525,84 @@ Proof.
     as elegant as possible. *)
 
 Fixpoint optimize_0plus_b (b : bexp) : bexp :=
-  (* FILL IN HERE *) admit.
-
+  match b with
+  | BTrue => BTrue
+  | BFalse => BFalse
+  | BEq x y => BEq (optimize_0plus x) (optimize_0plus y)
+  | BLe x y => BLe (optimize_0plus x) (optimize_0plus y)
+  | BNot x => BNot x
+  | BAnd x y => BAnd x y
+  end.
 
 Theorem optimize_0plus_b_sound : forall b,
   beval (optimize_0plus_b b) = beval b.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros.
+  induction b; auto;
+  unfold optimize_0plus_b; simpl;
+  do 2 (rewrite optimize_0plus_sound); auto.
+Qed.
 
 (** **** Exercise: 4 stars, optional (optimizer) *)
 (** _Design exercise_: The optimization implemented by our
     [optimize_0plus] function is only one of many imaginable
     optimizations on arithmetic and boolean expressions.  Write a more
-    sophisticated optimizer and prove it correct.
+    sophisticated optimizer and prove it correct. *)
 
-(* FILL IN HERE *)
-*)
-(** [] *)
+(* Rewrite a * b + a * c as a * (b + c), or mult_plus_distr_l *)
+Fixpoint optimize_split_mult (a:aexp) : aexp :=
+  match a with
+  | ANum n =>
+      ANum n
+  | APlus (AMult (ANum e1) e2) (AMult (ANum e3) e4) =>
+      if beq_nat e1 e3
+      then AMult (ANum e1) (APlus (optimize_split_mult e2)
+                                  (optimize_split_mult e4))
+      else APlus (AMult (ANum e1) (optimize_split_mult e2))
+                 (AMult (ANum e3) (optimize_split_mult e4))
+  | APlus e1 e2 =>
+      APlus (optimize_split_mult e1) (optimize_split_mult e2)
+  | AMinus e1 e2 =>
+      AMinus (optimize_split_mult e1) (optimize_split_mult e2)
+  | AMult e1 e2 =>
+      AMult (optimize_split_mult e1) (optimize_split_mult e2)
+  end.
+
+Fixpoint optimize_split_mult_b (b:bexp) : bexp :=
+  match b with
+  | BTrue => BTrue
+  | BFalse => BFalse
+  | BEq x y => BEq (optimize_split_mult x) (optimize_split_mult y)
+  | BLe x y => BLe (optimize_split_mult x) (optimize_split_mult y)
+  | BNot x => BNot x
+  | BAnd x y => BAnd x y
+  end.
+
+Theorem optimize_split_mult_sound : forall a,
+  aeval (optimize_split_mult a) = aeval a.
+Proof.
+  intros. induction a; auto; simpl in *;
+  try (rewrite IHa1);
+  try (rewrite IHa2); simpl in *; auto.
+  destruct a1; try destruct a1_1;
+    try (try (rewrite IHa1);
+         try (rewrite IHa2); simpl in *; auto).
+  destruct a2; try (simpl; rewrite IHa1; auto).
+  destruct a2_1; try (simpl; rewrite IHa1; auto).
+  destruct (beq_nat n n0) eqn:Heqe; simpl in *.
+    symmetry in Heqe.
+    apply beq_nat_eq in Heqe. subst.
+    rewrite mult_plus_distr_l. rewrite IHa1. auto.
+  apply beq_nat_false in Heqe. simpl.
+  rewrite IHa1. auto.
+Qed.
+
+Theorem optimize_split_mult_b_sound : forall b,
+  beval (optimize_split_mult_b b) = beval b.
+Proof.
+  intros. induction b; auto; simpl;
+  do 2 (rewrite optimize_split_mult_sound); auto.
+Qed.
 
 (* ####################################################### *)
 (** ** The [omega] Tactic *)
@@ -808,11 +868,37 @@ Qed.
 (** Write a relation [bevalR] in the same style as
     [aevalR], and prove that it is equivalent to [beval].*)
 
-(*
-Inductive bevalR:
-(* FILL IN HERE *)
-*)
-(** [] *)
+Reserved Notation "e '||b' n" (at level 50, left associativity).
+
+Inductive bevalR : bexp -> bool -> Prop :=
+  | E_BTrue : BTrue ||b true
+  | E_BFalse : BFalse ||b false
+  | E_BEq : forall (e1 e2: aexp) (n1 n2 : nat),
+      (e1 || n1) -> (e2 || n2) -> (BEq e1 e2) ||b (beq_nat n1 n2)
+  | E_BLe : forall (e1 e2: aexp) (n1 n2 : nat),
+      (e1 || n1) -> (e2 || n2) -> (BLe e1 e2) ||b (ble_nat n1 n2)
+  | E_BNot :  forall (e1 e2: bexp) (b : bool),
+      (e1 ||b b) -> (BNot e1) ||b (negb b)
+  | E_BAnd :  forall (e1 e2: bexp) (b1 b2 : bool),
+      (e1 ||b b1) -> (e2 ||b b2) -> (BAnd e1 e2) ||b (andb b1 b2)
+
+  where "e '||b' n" := (bevalR e n) : type_scope.
+
+Theorem beval_iff_bevalR : forall a b,
+  (a ||b b) <-> beval a = b.
+Proof.
+  intros. split.
+  Case "->".
+    intros H; induction H;
+    try (apply aeval_iff_aevalR' in H);
+    try (apply aeval_iff_aevalR' in H0);
+    subst; auto.
+  Case "<-".
+    generalize dependent b.
+    induction a; simpl; intros; subst; constructor;
+    try (apply aeval_iff_aevalR'); auto.
+Qed.
+
 End AExp.
 
 (* ####################################################### *)
