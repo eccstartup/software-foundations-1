@@ -1023,7 +1023,6 @@ Proof.
      right. intros contra. inversion contra. apply Hneq. apply H0.
 Defined.
 
-
 (** The following lemmas will be useful for rewriting terms involving [eq_id_dec]. *)
 
 Lemma eq_id : forall (T:Type) x (p q:T),
@@ -1040,9 +1039,10 @@ Proof.
 Lemma neq_id : forall (T:Type) x y (p q:T), x <> y ->
                (if eq_id_dec x y then p else q) = q.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
-
+  intros.
+  destruct (eq_id_dec x y).
+  contradiction. reflexivity.
+Qed.
 
 End Id.
 
@@ -1076,16 +1076,20 @@ Definition update (st : state) (x : id) (n : nat) : state :=
 Theorem update_eq : forall n x st,
   (update st x n) x = n.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros. unfold update.
+  destruct (eq_id_dec x x); auto;
+  contradiction n0; auto.
+Qed.
 
-(** **** Exercise: 1 star (update_neq) *)
+(** **** exercise: 1 star (update_neq) *)
 Theorem update_neq : forall x2 x1 n st,
   x2 <> x1 ->
   (update st x2 n) x1 = (st x1).
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros. unfold update.
+  destruct (eq_id_dec x2 x1); auto;
+  contradiction H; auto.
+Qed.
 
 (** **** Exercise: 1 star (update_example) *)
 (** Before starting to play with tactics, make sure you understand
@@ -1094,31 +1098,40 @@ Proof.
 Theorem update_example : forall (n:nat),
   (update empty_state (Id 2) n) (Id 3) = 0.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros. unfold update.
+  destruct (eq_id_dec (Id 2) (Id 3)).
+  inversion e. auto.
+Qed.
 
 (** **** Exercise: 1 star (update_shadow) *)
 Theorem update_shadow : forall n1 n2 x1 x2 (st : state),
    (update  (update st x2 n1) x2 n2) x1 = (update st x2 n2) x1.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros. unfold update.
+  destruct (eq_id_dec x2 x1);
+  try inversion e; auto.
+Qed.
 
 (** **** Exercise: 2 stars (update_same) *)
 Theorem update_same : forall n1 x1 x2 (st : state),
   st x1 = n1 ->
   (update st x1 n1) x2 = st x2.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros. unfold update.
+  destruct (eq_id_dec x1 x2);
+  try inversion e; subst; auto.
+Qed.
 
 (** **** Exercise: 3 stars (update_permute) *)
 Theorem update_permute : forall n1 n2 x1 x2 x3 st,
   x2 <> x1 ->
   (update (update st x2 n1) x1 n2) x3 = (update (update st x1 n2) x2 n1) x3.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros. unfold update.
+  destruct (eq_id_dec x1 x3);
+  destruct (eq_id_dec x2 x3);
+  try inversion e; subst; auto; contradiction.
+Qed.
 
 (* ################################################### *)
 (** ** Syntax  *)
@@ -1426,7 +1439,7 @@ Fixpoint ceval_fun_no_while (st : state) (c : com) : state :=
                            c / st || st'
                   WHILE b DO c END / st' || st''
                   ---------------------------------               (E_WhileLoop)
-                    WHILE b DO c END / st || st''
+a                    WHILE b DO c END / st || st''
 *)
 
 (** Here is the formal definition.  (Make sure you understand
@@ -1498,8 +1511,12 @@ Example ceval_example2:
     (X ::= ANum 0;; Y ::= ANum 1;; Z ::= ANum 2) / empty_state ||
     (update (update (update empty_state X 0) Y 1) Z 2).
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  apply E_Seq with (st' := update empty_state X 0).
+    apply E_Ass. auto.
+  apply E_Seq with (st' := update (update empty_state X 0) Y 1).
+    apply E_Ass. auto.
+  apply E_Ass. auto.
+Qed.
 
 (** **** Exercise: 3 stars, advanced (pup_to_n) *)
 (** Write an Imp program that sums the numbers from [1] to
@@ -1508,15 +1525,35 @@ Proof.
    (this latter part is trickier than you might expect). *)
 
 Definition pup_to_n : com :=
-  (* FILL IN HERE *) admit.
+    (Y ::= ANum 0;;
+     WHILE BLe (ANum 1) (AId X)
+       DO Y ::= APlus (AId Y) (AId X);;
+          X ::= AMinus (AId X) (ANum 1)
+       END).
 
 Theorem pup_to_2_ceval :
   pup_to_n / (update empty_state X 2) ||
     update (update (update (update (update (update empty_state
       X 2) Y 0) Y 2) X 1) Y 3) X 0.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros.
+  unfold pup_to_n.
+  apply E_Seq with (st' := update (update empty_state X 2) Y 0).
+    apply E_Ass. auto.
+  apply E_WhileLoop
+    with (st' := update (update (update (update empty_state X 2) Y 0) Y 2) X 1).
+  - auto.
+  - apply E_Seq with (st' := update (update (update empty_state X 2) Y 0) Y 2);
+    apply E_Ass; auto.
+  - apply E_WhileLoop
+      with (st' := update (update (update (update (update (update
+                     empty_state X 2) Y 0) Y 2) X 1) Y 3) X 0).
+    + auto.
+    + apply E_Seq with (st' := update (update (update (update (update
+                                 empty_state X 2) Y 0) Y 2) X 1) Y 3);
+      apply E_Ass; auto.
+    + apply E_WhileEnd. auto.
+Qed.
 
 
 (* ####################################################### *)
@@ -1649,7 +1686,33 @@ Proof.
     State and prove a theorem that says this. *)
 (** (Use either [no_whiles] or [no_whilesR], as you prefer.) *)
 
-(* FILL IN HERE *)
+Lemma ceval_equiv:
+  (* Or: If there are no WHILEs present, then ceval_fun_no_while is equivalent
+     to ceval. *)
+  forall c st, no_whiles c = true -> ceval c st (ceval_fun_no_while st c).
+Proof.
+  intros.
+  generalize dependent st.
+  induction c; intros; simpl.
+  Case "skip". apply E_Skip.
+  Case "::=". apply E_Ass. reflexivity.
+  Case ";;".
+    simpl in H. apply andb_true_iff in H. inversion H.
+    apply E_Seq with (st' := (ceval_fun_no_while st c1)).
+      apply IHc1. assumption.
+    apply IHc2. assumption.
+  Case "if".
+    simpl in H. apply andb_true_iff in H. inversion H.
+    destruct b; simpl.
+      apply E_IfTrue; auto.
+      apply E_IfFalse; auto.
+      admit.
+      admit.
+      admit.
+      admit.
+  Case "while".
+    inversion H.
+Qed.
 (** [] *)
 
 (* ####################################################### *)
