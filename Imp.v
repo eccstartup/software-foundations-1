@@ -1637,8 +1637,17 @@ Proof.
 (** **** Exercise: 3 stars (XtimesYinZ_spec) *)
 (** State and prove a specification of [XtimesYinZ]. *)
 
-(* FILL IN HERE *)
-(** [] *)
+Theorem XtimesYinZ_spec: forall st nx ny st',
+  st X = nx ->
+  st Y = ny ->
+  st Z = 0 ->
+  XtimesYinZ / st || st' ->
+  st' Z = nx * ny.
+Proof.
+  intros.
+  inversion H2. subst. clear H2. simpl.
+  apply update_eq.
+Qed.
 
 (** **** Exercise: 3 stars (loop_never_stops) *)
 Theorem loop_never_stops : forall st st',
@@ -1650,8 +1659,10 @@ Proof.
      [loopdef] terminates.  Most of the cases are immediately
      contradictory (and so can be solved in one step with
      [inversion]). *)
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  induction contra; inversion Heqloopdef.
+  subst. inversion H.
+  apply IHcontra2. subst. reflexivity.
+Qed.
 
 (** **** Exercise: 3 stars (no_whilesR) *)
 (** Consider the definition of the [no_whiles] property below: *)
@@ -1672,24 +1683,51 @@ Fixpoint no_whiles (c : com) : bool :=
     with [no_whiles]. *)
 
 Inductive no_whilesR: com -> Prop :=
- (* FILL IN HERE *)
-  .
+  | from_Skip : no_whilesR CSkip
+  | from_Ass x y : no_whilesR (CAss x y)
+  | from_Seq x y : no_whilesR x -> no_whilesR y -> no_whilesR (CSeq x y)
+  | from_If b x y : no_whilesR x -> no_whilesR y -> no_whilesR (CIf b x y).
 
 Theorem no_whiles_eqv:
-   forall c, no_whiles c = true <-> no_whilesR c.
+  forall c, no_whiles c = true <-> no_whilesR c.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros. split; intros.
+  - induction c; try constructor;
+    inversion H;
+    try (apply andb_true_elim1 in H1; apply IHc1);
+    try (apply andb_true_elim2 in H1; apply IHc2);
+    assumption.
+  - induction c; simpl; auto;
+    inversion H; subst;
+    apply andb_true_intro; split;
+    try (apply IHc1); try (apply IHc2); assumption;
+    try (apply IHc2); try (apply IHc1); assumption.
+Qed.
 
 (** **** Exercise: 4 stars (no_whiles_terminating) *)
 (** Imp programs that don't involve while loops always terminate.
     State and prove a theorem that says this. *)
 (** (Use either [no_whiles] or [no_whilesR], as you prefer.) *)
 
+Lemma ceval_split_if : forall st b c1 c2,
+   (beval st b = true  /\ (c1 / st || ceval_fun_no_while st c1)) \/
+   (beval st b = false /\ (c2 / st || ceval_fun_no_while st c2)) ->
+   (IFB b THEN c1 ELSE c2 FI) / st
+   || (if beval st b
+       then ceval_fun_no_while st c1
+       else ceval_fun_no_while st c2).
+Proof.
+  intros.
+  induction b; intros; simpl;
+  inversion H; inversion H0; subst;
+    try (inversion H1; apply E_IfTrue;  auto; rewrite H4; assumption);
+    try (inversion H1; apply E_IfFalse; auto; rewrite H4; assumption).
+Qed.
+
 Lemma ceval_equiv:
   (* Or: If there are no WHILEs present, then ceval_fun_no_while is equivalent
      to ceval. *)
-  forall c st, no_whiles c = true -> ceval c st (ceval_fun_no_while st c).
+  forall c st, no_whilesR c -> ceval c st (ceval_fun_no_while st c).
 Proof.
   intros.
   generalize dependent st.
@@ -1697,23 +1735,23 @@ Proof.
   Case "skip". apply E_Skip.
   Case "::=". apply E_Ass. reflexivity.
   Case ";;".
-    simpl in H. apply andb_true_iff in H. inversion H.
-    apply E_Seq with (st' := (ceval_fun_no_while st c1)).
-      apply IHc1. assumption.
-    apply IHc2. assumption.
+    inversion H; subst.
+    apply E_Seq with (st' := (ceval_fun_no_while st c1));
+      [ apply IHc1 | apply IHc2]; assumption.
   Case "if".
-    simpl in H. apply andb_true_iff in H. inversion H.
-    destruct b; simpl.
-      apply E_IfTrue; auto.
-      apply E_IfFalse; auto.
-      admit.
-      admit.
-      admit.
-      admit.
-  Case "while".
-    inversion H.
+    inversion H; subst; induction b; simpl;
+    apply IHc1 with (st := st) in H2; clear IHc1;
+    apply IHc2 with (st := st) in H4; clear IHc2;
+      first [ apply ceval_split_if; simpl;
+              match goal with
+                [ |- context [?X = true] ] => destruct X
+              end
+            | apply E_IfFalse
+            | apply E_IfTrue
+            ]; auto.
+  Case "while". inversion H.
 Qed.
-(** [] *)
+
 
 (* ####################################################### *)
 (** * Additional Exercises *)
@@ -1778,38 +1816,58 @@ Inductive sinstr : Type :=
 Fixpoint s_execute (st : state) (stack : list nat)
                    (prog : list sinstr)
                  : list nat :=
-(* FILL IN HERE *) admit.
-
+  match prog with
+  | nil => stack
+  | cons i is =>
+    match i with
+    | SPush x => s_execute st (cons x stack) is
+    | SLoad x => s_execute st (cons (st x) stack) is
+    | _ =>
+      match stack with
+      | cons x (cons y ys) =>
+        s_execute st (cons (match i with
+                            | SPlus  => y + x
+                            | SMinus => y - x
+                            | SMult  => y * x
+                            | _      => x
+                            end) ys) is
+      | _ => s_execute st stack is
+      end
+    end
+  end.
 
 Example s_execute1 :
      s_execute empty_state []
        [SPush 5; SPush 3; SPush 1; SMinus]
    = [2; 5].
-(* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 
 Example s_execute2 :
      s_execute (update empty_state X 3) [3;4]
        [SPush 4; SLoad X; SMult; SPlus]
    = [15; 4].
-(* FILL IN HERE *) Admitted.
+Proof. compute. reflexivity. Qed.
 
 (** Next, write a function which compiles an [aexp] into a stack
     machine program. The effect of running the program should be the
     same as pushing the value of the expression on the stack. *)
 
 Fixpoint s_compile (e : aexp) : list sinstr :=
-(* FILL IN HERE *) admit.
+  match e with
+  | ANum x      => [SPush x]
+  | AId x       => [SLoad x]
+  | APlus x x0  => s_compile x ++ s_compile x0 ++ [SPlus]
+  | AMinus x x0 => s_compile x ++ s_compile x0 ++ [SMinus]
+  | AMult x x0  => s_compile x ++ s_compile x0 ++ [SMult]
+  end.
 
 (** After you've defined [s_compile], uncomment the following to test
     that it works. *)
 
-(*
 Example s_compile1 :
     s_compile (AMinus (AId X) (AMult (ANum 2) (AId Y)))
   = [SLoad X; SPush 2; SLoad Y; SMult; SMinus].
 Proof. reflexivity. Qed.
-*)
-(** [] *)
 
 (** **** Exercise: 3 stars, advanced (stack_compiler_correct) *)
 (** The task of this exercise is to prove the correctness of the
@@ -1825,12 +1883,19 @@ Proof. reflexivity. Qed.
     general lemma to get a usable induction hypothesis; the main
     theorem will then be a simple corollary of this lemma. *)
 
+(* Lemma s_compile_basic : forall st e, *)
+(*   s_execute st [] (s_compile e) = [ aeval st e ] -> *)
+(*   s_compile e = [ SPush (aeval st e) ]. *)
+(* Proof. *)
+(*   intros. *)
+(*   induction e; simpl in *; auto. *)
+(* Qed. *)
 
 Theorem s_compile_correct : forall (st : state) (e : aexp),
   s_execute st [] (s_compile e) = [ aeval st e ].
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  intros.
+  induction e; simpl in *; auto.
 
 (** **** Exercise: 5 stars, advanced (break_imp) *)
 Module BreakImp.
