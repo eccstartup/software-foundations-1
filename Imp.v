@@ -1883,21 +1883,28 @@ Proof. reflexivity. Qed.
     general lemma to get a usable induction hypothesis; the main
     theorem will then be a simple corollary of this lemma. *)
 
-(* Lemma s_compile_basic : forall st e, *)
-(*   s_execute st [] (s_compile e) = [ aeval st e ] -> *)
-(*   s_compile e = [ SPush (aeval st e) ]. *)
-(* Proof. *)
-(*   intros. *)
-(*   induction e; simpl in *; auto. *)
-(* Qed. *)
+Lemma s_compile_basic : forall st stack e1 e2,
+  s_execute st stack (e1 ++ e2) = s_execute st (s_execute st stack e1) e2.
+Proof.
+  intros. generalize dependent stack.
+  induction e1; simpl in *; auto;
+  destruct a; repeat (destruct stack; repeat apply IHe1).
+Qed.
+
+Theorem s_compile_cons : forall st stack e,
+  s_execute st stack (s_compile e) = aeval st e :: stack.
+Proof.
+  intros. generalize dependent stack.
+  induction e; simpl in *; auto; intros;
+  rewrite s_compile_basic; rewrite IHe1;
+  rewrite s_compile_basic; rewrite IHe2; reflexivity.
+Qed.
 
 Theorem s_compile_correct : forall (st : state) (e : aexp),
   s_execute st [] (s_compile e) = [ aeval st e ].
-Proof.
-  intros.
-  induction e; simpl in *; auto.
+Proof. intros. apply s_compile_cons. Qed.
 
-(** **** Exercise: 5 stars, advanced (break_imp) *)
+(** **** exercise: 5 stars, advanced (break_imp) *)
 Module BreakImp.
 
 (** Imperative languages such as C or Java often have a [break] or
@@ -2017,14 +2024,54 @@ Reserved Notation "c1 '/' st '||' s '/' st'"
 Inductive ceval : com -> state -> status -> state -> Prop :=
   | E_Skip : forall st,
       CSkip / st || SContinue / st
-  (* FILL IN HERE *)
+  | E_Break  : forall st,
+      CBreak / st || SBreak / st
+  | E_Ass  : forall st a1 n x,
+      aeval st a1 = n ->
+      (x ::= a1) / st || SContinue / (update st x n)
+  | E_Seq : forall c1 c2 st st' st'' s,
+      c1 / st  || SContinue / st' ->
+      c2 / st' || s / st'' ->
+      (c1 ; c2) / st || s / st''
+  | E_SeqBreak : forall c1 c2 st st',
+      c1 / st  || SBreak / st' ->
+      (c1 ; c2) / st || SBreak / st'
+  | E_IfTrue : forall st st' s b c1 c2,
+      beval st b = true ->
+      c1 / st || s / st' ->
+      (IFB b THEN c1 ELSE c2 FI) / st || s / st'
+  | E_IfFalse : forall st st' s b c1 c2,
+      beval st b = false ->
+      c2 / st || s / st' ->
+      (IFB b THEN c1 ELSE c2 FI) / st || s / st'
+  | E_WhileEnd : forall b st c,
+      beval st b = false ->
+      (WHILE b DO c END) / st || SContinue / st
+  | E_WhileLoop : forall st st' st'' b c,
+      beval st b = true ->
+      beval st'' b = false ->
+      c / st || SContinue / st' ->
+      (WHILE b DO c END) / st' || SContinue / st'' ->
+      (WHILE b DO c END) / st || SContinue / st''
+  | E_WhileLoopBreak : forall st st' b c,
+      beval st b = true ->
+      c / st || SBreak / st' ->
+      (WHILE b DO c END) / st || SContinue / st'
 
   where "c1 '/' st '||' s '/' st'" := (ceval c1 st s st').
 
 Tactic Notation "ceval_cases" tactic(first) ident(c) :=
   first;
   [ Case_aux c "E_Skip"
-  (* FILL IN HERE *)
+  | Case_aux c "E_Break"
+  | Case_aux c "E_Ass"
+  | Case_aux c "E_Seq"
+  | Case_aux c "E_SeqBreak"
+  | Case_aux c "E_IfTrue"
+  | Case_aux c "E_IfFalse"
+  | Case_aux c "E_WhileEnd"
+  | Case_aux c "E_WhileLoop"
+  | Case_aux c "E_WhileLoopBreak"
   ].
 
 (** Now the following properties of your definition of [ceval]: *)
@@ -2033,20 +2080,21 @@ Theorem break_ignore : forall c st st' s,
      (BREAK; c) / st || s / st' ->
      st = st'.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  inversion H; subst. inversion H2.
+  inversion H5. reflexivity.
+Qed.
 
 Theorem while_continue : forall b c st st' s,
   (WHILE b DO c END) / st || s / st' ->
   s = SContinue.
-Proof.
-  (* FILL IN HERE *) Admitted.
+Proof. intros. inversion H; subst; auto. Qed.
 
 Theorem while_stops_on_break : forall b c st st',
   beval st b = true ->
   c / st || SBreak / st' ->
   (WHILE b DO c END) / st || SContinue / st'.
-Proof.
-  (* FILL IN HERE *) Admitted.
+Proof. intros. constructor; assumption. Qed.
 
 (** **** Exercise: 3 stars, advanced, optional (while_break_true) *)
 Theorem while_break_true : forall b c st st',
@@ -2054,15 +2102,27 @@ Theorem while_break_true : forall b c st st',
   beval st' b = true ->
   exists st'', c / st'' || SBreak / st'.
 Proof.
-(* FILL IN HERE *) Admitted.
+  intros. inversion H; subst;
+    try (contradict H0; apply not_true_iff_false; assumption).
+  exists st. assumption.
+Qed.
 
 (** **** Exercise: 4 stars, advanced, optional (ceval_deterministic) *)
 Theorem ceval_deterministic: forall (c:com) st st1 st2 s1 s2,
-     c / st || s1 / st1  ->
-     c / st || s2 / st2 ->
-     st1 = st2 /\ s1 = s2.
+  c / st || s1 / st1 ->
+  c / st || s2 / st2 ->
+  st1 = st2 /\ s1 = s2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros c st st1 st2 s1 s2 HP HQ.
+  generalize dependent st2.
+  ceval_cases (induction HP) Case; intros st2 HQ.
+  inversion HQ; subst; auto.
+  inversion HQ; subst; auto.
+  inversion HQ; subst; auto.
+  admit.
+  admit.
+  admit..
+Abort.
 
 End BreakImp.
 (** [] *)
