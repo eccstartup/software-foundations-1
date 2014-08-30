@@ -2107,6 +2107,8 @@ Proof.
   exists st. assumption.
 Qed.
 
+Ltac clash H := contradict H; apply not_true_iff_false; assumption.
+
 (** **** Exercise: 4 stars, advanced, optional (ceval_deterministic) *)
 Theorem ceval_deterministic: forall (c:com) st st1 st2 s1 s2,
   c / st || s1 / st1 ->
@@ -2117,50 +2119,39 @@ Proof.
   generalize dependent st2.
   generalize dependent s2.
   ceval_cases (induction HP) Case; intros s2 st2 HQ; inversion HQ; subst.
-  Case "E_Skip". auto.
+  Case "E_Skip".  auto.
   Case "E_Break". auto.
-  Case "E_Ass". auto.
+  Case "E_Ass".   auto.
+
   Case "E_Seq".
     assert (st' = st'0 /\ SContinue = SContinue) as E1.
       apply IHHP1. assumption. inversion E1; subst.
     apply IHHP2. assumption.
-  Case "E_Seq".
-    apply IHHP1 in H4. inversion H4. inversion H0.
-  Case "E_SeqBreak".
-    apply IHHP in H1. inversion H1. inversion H0.
-  Case "E_SeqBreak".
-    apply IHHP. assumption.
-  Case "E_IfTrue".
-    apply IHHP in H7. assumption.
-  Case "E_IfTrue".
-    contradict H; apply not_true_iff_false; assumption.
-  Case "E_IfFalse".
-    contradict H6; apply not_true_iff_false; assumption.
-  Case "E_IfFalse".
-    apply IHHP in H7. assumption.
-  Case "E_WhileEnd". auto.
-  Case "E_WhileEnd".
-    contradict H2; apply not_true_iff_false; assumption.
-  Case "E_WhileEnd".
-    contradict H2; apply not_true_iff_false; assumption.
-  Case "E_WhileLoop".
-    contradict H; apply not_true_iff_false; assumption.
+
+  Case "E_Seq".       apply IHHP1 in H4. inversion H4. inversion H0.
+  Case "E_SeqBreak".  apply IHHP in H1. inversion H1. inversion H0.
+  Case "E_SeqBreak".  apply IHHP. assumption.
+  Case "E_IfTrue".    apply IHHP in H7. assumption.
+  Case "E_IfTrue".    clash H.
+  Case "E_IfFalse".   clash H6.
+  Case "E_IfFalse".   apply IHHP in H7. assumption.
+  Case "E_WhileEnd".  auto.
+  Case "E_WhileEnd".  clash H2.
+  Case "E_WhileEnd".  clash H2.
+  Case "E_WhileLoop". clash H.
+
   Case "E_WhileLoop".
     assert (st' = st'0 /\ SContinue = SContinue) as E1.
       apply IHHP1. assumption. inversion E1; subst.
     apply IHHP2. assumption.
-  Case "E_WhileLoop".
-    apply IHHP1 in H7. inversion H7. inversion H2.
-  Case "E_WhileLoopBreak".
-    contradict H; apply not_true_iff_false; assumption.
-  Case "E_WhileLoopBreak".
-    apply IHHP in H4. inversion H4. inversion H1.
-  Case "E_WhileLoopBreak".
-    apply IHHP in H6. inversion H6. subst. auto.
+
+  Case "E_WhileLoop".       apply IHHP1 in H7. inversion H7. inversion H2.
+  Case "E_WhileLoopBreak" . clash H.
+  Case "E_WhileLoopBreak" . apply IHHP in H4. inversion H4. inversion H1.
+  Case "E_WhileLoopBreak" . apply IHHP in H6. inversion H6. subst. auto.
 Qed.
 
 End BreakImp.
-(** [] *)
 
 (** **** Exercise: 3 stars, optional (short_circuit) *)
 (** Most modern programming languages use a "short-circuit" evaluation
@@ -2174,8 +2165,26 @@ End BreakImp.
     evaluation of [BAnd] in this manner, and prove that it is
     equivalent to [beval]. *)
 
-(* FILL IN HERE *)
-(** [] *)
+Fixpoint beval_ss (st : state) (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => beq_nat (aeval st a1) (aeval st a2)
+  | BLe a1 a2   => ble_nat (aeval st a1) (aeval st a2)
+  | BNot b1     => negb (beval_ss st b1)
+  | BAnd b1 b2  => if beval_ss st b1
+                   then beval st b2
+                   else false
+  end.
+
+Theorem beval_ss_equiv : forall st b,
+  beval st b = beval_ss st b.
+Proof.
+  intros.
+  induction b; auto; simpl.
+    simpl. f_equal. apply IHb.
+  rewrite <- IHb1. auto.
+Qed.
 
 (** **** Exercise: 4 stars, optional (add_for_loop) *)
 (** Add C-style [for] loops to the language of commands, update the
@@ -2191,8 +2200,55 @@ End BreakImp.
     about making up a concrete Notation for [for] loops, but feel free
     to play with this too if you like.) *)
 
-(* FILL IN HERE *)
-(** [] *)
+(** jww (2014-08-30): Adding CFor as a primitive constructor is unnecessary,
+    since it can be desugared into a CWhile, which is the approach I've taken
+    here. *)
 
+Definition CFor (i : com) (t : bexp) (s c : com) := i ;; WHILE t DO c ;; s END.
+
+Notation "'FOR' ( i ';' t ';' s ) 'DO' c 'END'" :=
+  (CFor i t s c) (at level 80, right associativity).
+
+Definition fact_using_for : com :=
+  Y ::= ANum 1;;
+  FOR ( Z ::= AId X
+      ; BNot (BEq (AId Z) (ANum 0))
+      ; Z ::= AMinus (AId Z) (ANum 1)
+      )
+  DO
+    Y ::= AMult (AId Y) (AId Z)
+  END.
+
+Notation "v :== n" :=
+  (update empty_state v n) (at level 190, left associativity).
+Notation "st >> v := n" :=
+  (update st v n) (at level 190, left associativity).
+
+Example for_example1 : fact_using_for / (X :== 2) ||
+  (X :== 2 >> Y := 1 >> Z := 2 >> Y := 2 >> Z := 1 >> Y := 2 >> Z := 0).
+Proof.
+  unfold fact_using_for.
+  apply E_Seq with (X :== 2 >> Y := 1).
+    apply E_Ass. reflexivity.
+
+  unfold CFor.
+
+  apply E_Seq with (X :== 2 >> Y := 1 >> Z := 2).
+    apply E_Ass. reflexivity.
+  apply E_WhileLoop with (st' := X :== 2 >> Y := 1 >> Z := 2
+                                         >> Y := 2 >> Z := 1); auto.
+  apply E_Seq with (X :== 2 >> Y := 1 >> Z := 2 >> Y := 2).
+    apply E_Ass. reflexivity.
+  apply E_Ass. reflexivity.
+
+  apply E_WhileLoop with (st' := X :== 2 >> Y := 1 >> Z := 2
+                                         >> Y := 2 >> Z := 1
+                                         >> Y := 2 >> Z := 0); auto.
+  apply E_Seq with (X :== 2 >> Y := 1 >> Z := 2 >> Y := 2 >> Z := 1 >> Y := 2).
+    apply E_Ass. reflexivity.
+  apply E_Ass. reflexivity.
+
+  apply E_WhileEnd. auto.
+Qed.
 
 (* <$Date: 2014-02-22 09:43:41 -0500 (Sat, 22 Feb 2014) $ *)
