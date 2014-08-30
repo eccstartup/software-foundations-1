@@ -2097,17 +2097,24 @@ Theorem while_stops_on_break : forall b c st st',
 Proof. intros. constructor; assumption. Qed.
 
 (** **** Exercise: 3 stars, advanced, optional (while_break_true) *)
+Ltac clash H := contradict H; apply not_true_iff_false; assumption.
+
+Ltac autoclash :=
+  match goal with
+    [ H: ?X = false |- _ ] =>
+      match goal with
+        [ H2: X = true |- _ ] => clash H2
+      end
+  end.
+
 Theorem while_break_true : forall b c st st',
   (WHILE b DO c END) / st || SContinue / st' ->
   beval st' b = true ->
   exists st'', c / st'' || SBreak / st'.
 Proof.
-  intros. inversion H; subst;
-    try (contradict H0; apply not_true_iff_false; assumption).
+  intros. inversion H; subst; try autoclash.
   exists st. assumption.
 Qed.
-
-Ltac clash H := contradict H; apply not_true_iff_false; assumption.
 
 (** **** Exercise: 4 stars, advanced, optional (ceval_deterministic) *)
 Theorem ceval_deterministic: forall (c:com) st st1 st2 s1 s2,
@@ -2115,40 +2122,20 @@ Theorem ceval_deterministic: forall (c:com) st st1 st2 s1 s2,
   c / st || s2 / st2 ->
   st1 = st2 /\ s1 = s2.
 Proof.
-  intros c st st1 st2 s1 s2 HP HQ.
+  intros.
+  rename H into HP.
   generalize dependent st2.
   generalize dependent s2.
-  ceval_cases (induction HP) Case; intros s2 st2 HQ; inversion HQ; subst.
-  Case "E_Skip".  auto.
-  Case "E_Break". auto.
-  Case "E_Ass".   auto.
-
-  Case "E_Seq".
-    assert (st' = st'0 /\ SContinue = SContinue) as E1.
-      apply IHHP1. assumption. inversion E1; subst.
-    apply IHHP2. assumption.
-
-  Case "E_Seq".       apply IHHP1 in H4. inversion H4. inversion H0.
-  Case "E_SeqBreak".  apply IHHP in H1. inversion H1. inversion H0.
-  Case "E_SeqBreak".  apply IHHP. assumption.
-  Case "E_IfTrue".    apply IHHP in H7. assumption.
-  Case "E_IfTrue".    clash H.
-  Case "E_IfFalse".   clash H6.
-  Case "E_IfFalse".   apply IHHP in H7. assumption.
-  Case "E_WhileEnd".  auto.
-  Case "E_WhileEnd".  clash H2.
-  Case "E_WhileEnd".  clash H2.
-  Case "E_WhileLoop". clash H.
-
-  Case "E_WhileLoop".
-    assert (st' = st'0 /\ SContinue = SContinue) as E1.
-      apply IHHP1. assumption. inversion E1; subst.
-    apply IHHP2. assumption.
-
-  Case "E_WhileLoop".       apply IHHP1 in H7. inversion H7. inversion H2.
-  Case "E_WhileLoopBreak" . clash H.
-  Case "E_WhileLoopBreak" . apply IHHP in H4. inversion H4. inversion H1.
-  Case "E_WhileLoopBreak" . apply IHHP in H6. inversion H6. subst. auto.
+  ceval_cases (induction HP) Case;
+  intros s2 st2 HQ;
+  inversion HQ; subst;
+  auto; try autoclash;
+  match goal with
+  | [ H: _ / _ || _ / _ |- _ ] =>
+    first [ apply IHHP in H | apply IHHP1 in H ];
+    inversion H as [? H'];
+    try inversion H'; subst; auto
+  end.
 Qed.
 
 End BreakImp.
