@@ -182,23 +182,35 @@ Definition test_ceval (st:state) (c:com) :=
    your solution satisfies the test that follows. *)
 
 Definition pup_to_n : com :=
-  (* FILL IN HERE *) admit.
+  (Y ::= ANum 0;;
+   WHILE BLe (ANum 1) (AId X)
+     DO Y ::= APlus (AId Y) (AId X);;
+        X ::= AMinus (AId X) (ANum 1)
+     END).
 
-(*
 Example pup_to_n_1 :
-  test_ceval (update empty_state X 5) pup_to_n
-  = Some (0, 15, 0).
+  test_ceval (update empty_state X 5) pup_to_n = Some (0, 15, 0).
 Proof. reflexivity. Qed.
-*)
-(** [] *)
 
 (** **** Exercise: 2 stars, optional (peven) *)
 (** Write a [While] program that sets [Z] to [0] if [X] is even and
     sets [Z] to [1] otherwise.  Use [ceval_test] to test your
     program. *)
 
-(* FILL IN HERE *)
-(** [] *)
+Definition peven : com :=
+  (Z ::= AId X;;
+   WHILE BLe (ANum 2) (AId Z)
+     DO Z ::= AMinus (AId Z) (ANum 2)
+     END).
+
+Example peven__1 :
+  test_ceval (update empty_state X 7) peven = Some (7, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven__2 :
+  test_ceval (update empty_state X 8) peven = Some (8, 0, 0).
+Proof. reflexivity. Qed.
+
 
 (* ################################################################ *)
 (** * Equivalence of Relational and Step-Indexed Evaluation *)
@@ -210,8 +222,7 @@ Proof. reflexivity. Qed.
     follow the structure of the proofs. *)
 
 Theorem ceval_step__ceval: forall c st st',
-      (exists i, ceval_step st c i = Some st') ->
-      c / st || st'.
+  (exists i, ceval_step st c i = Some st') -> c / st || st'.
 Proof.
   intros c st st' H.
   inversion H as [i E].
@@ -271,8 +282,7 @@ Proof.
     the main ideas to a human reader; do not simply transcribe the
     steps of the formal proof.
 
-(* FILL IN HERE *)
-[]
+[] SKIPPED
 *)
 
 Theorem ceval_step_more: forall i1 i2 st st' c,
@@ -323,13 +333,20 @@ induction i1 as [|i1']; intros i2 st st' c Hle Hceval.
     few places, as well as some basic facts about [<=] and [plus]. *)
 
 Theorem ceval__ceval_step: forall c st st',
-      c / st || st' ->
-      exists i, ceval_step st c i = Some st'.
+  c / st || st' -> exists i, ceval_step st c i = Some st'.
 Proof.
   intros c st st' Hce.
-  ceval_cases (induction Hce) Case.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  ceval_cases (induction Hce) Case;
+  first [ inversion IHHce1 as [x1 H1];
+          inversion IHHce2 as [x2 ?]; exists (S (x1 + x2))
+        | inversion IHHce as [x ?];   exists (S x)
+        | exists 1; auto ];
+  simpl; try rewrite H; auto;
+  apply ceval_step_more with (i2 := x1 + x2) in H1;
+  first [ rewrite H1;
+          apply ceval_step_more with (i1 := x2); [ omega | auto ]
+        | omega ].
+Qed.
 
 Theorem ceval_and_ceval_step_coincide: forall c st st',
       c / st || st'
