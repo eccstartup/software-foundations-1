@@ -2115,14 +2115,49 @@ Theorem ceval_deterministic: forall (c:com) st st1 st2 s1 s2,
 Proof.
   intros c st st1 st2 s1 s2 HP HQ.
   generalize dependent st2.
-  ceval_cases (induction HP) Case; intros st2 HQ.
-  inversion HQ; subst; auto.
-  inversion HQ; subst; auto.
-  inversion HQ; subst; auto.
-  admit.
-  admit.
-  admit..
-Abort.
+  generalize dependent s2.
+  ceval_cases (induction HP) Case; intros s2 st2 HQ; inversion HQ; subst.
+  Case "E_Skip". auto.
+  Case "E_Break". auto.
+  Case "E_Ass". auto.
+  Case "E_Seq".
+    assert (st' = st'0 /\ SContinue = SContinue) as E1.
+      apply IHHP1. assumption. inversion E1; subst.
+    apply IHHP2. assumption.
+  Case "E_Seq".
+    apply IHHP1 in H4. inversion H4. inversion H0.
+  Case "E_SeqBreak".
+    apply IHHP in H1. inversion H1. inversion H0.
+  Case "E_SeqBreak".
+    apply IHHP. assumption.
+  Case "E_IfTrue".
+    apply IHHP in H7. assumption.
+  Case "E_IfTrue".
+    contradict H; apply not_true_iff_false; assumption.
+  Case "E_IfFalse".
+    contradict H6; apply not_true_iff_false; assumption.
+  Case "E_IfFalse".
+    apply IHHP in H7. assumption.
+  Case "E_WhileEnd". auto.
+  Case "E_WhileEnd".
+    contradict H2; apply not_true_iff_false; assumption.
+  Case "E_WhileEnd".
+    contradict H2; apply not_true_iff_false; assumption.
+  Case "E_WhileLoop".
+    contradict H; apply not_true_iff_false; assumption.
+  Case "E_WhileLoop".
+    assert (st' = st'0 /\ SContinue = SContinue) as E1.
+      apply IHHP1. assumption. inversion E1; subst.
+    apply IHHP2. assumption.
+  Case "E_WhileLoop".
+    apply IHHP1 in H7. inversion H7. inversion H2.
+  Case "E_WhileLoopBreak".
+    contradict H; apply not_true_iff_false; assumption.
+  Case "E_WhileLoopBreak".
+    apply IHHP in H4. inversion H4. inversion H1.
+  Case "E_WhileLoopBreak".
+    apply IHHP in H6. inversion H6. subst. auto.
+Qed.
 
 End BreakImp.
 (** [] *)
