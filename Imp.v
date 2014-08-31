@@ -2107,12 +2107,14 @@ Ltac autoclash :=
       end
   end.
 
+Hint Extern 1 => try autoclash.
+
 Theorem while_break_true : forall b c st st',
   (WHILE b DO c END) / st || SContinue / st' ->
   beval st' b = true ->
   exists st'', c / st'' || SBreak / st'.
 Proof.
-  intros. inversion H; subst; try autoclash.
+  intros. inversion H; subst; auto.
   exists st. assumption.
 Qed.
 
@@ -2128,8 +2130,7 @@ Proof.
   generalize dependent s2.
   ceval_cases (induction HP) Case;
   intros s2 st2 HQ;
-  inversion HQ; subst;
-  auto; try autoclash;
+  inversion HQ; subst; auto;
   match goal with
   | [ H: _ / _ || _ / _ |- _ ] =>
     first [ apply IHHP in H | apply IHHP1 in H ];
