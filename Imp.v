@@ -2097,24 +2097,12 @@ Theorem while_stops_on_break : forall b c st st',
 Proof. intros. constructor; assumption. Qed.
 
 (** **** Exercise: 3 stars, advanced, optional (while_break_true) *)
-Ltac clash H := contradict H; apply not_true_iff_false; assumption.
-
-Ltac autoclash :=
-  match goal with
-    [ H: ?X = false |- _ ] =>
-      match goal with
-        [ H2: X = true |- _ ] => clash H2
-      end
-  end.
-
-Hint Extern 1 => try autoclash.
-
 Theorem while_break_true : forall b c st st',
   (WHILE b DO c END) / st || SContinue / st' ->
   beval st' b = true ->
   exists st'', c / st'' || SBreak / st'.
 Proof.
-  intros. inversion H; subst; auto.
+  intros. inversion H; subst; auto; try congruence.
   exists st. assumption.
 Qed.
 
@@ -2130,7 +2118,8 @@ Proof.
   generalize dependent s2.
   ceval_cases (induction HP) Case;
   intros s2 st2 HQ;
-  inversion HQ; subst; auto;
+  inversion HQ; subst;
+  auto; try congruence;
   match goal with
   | [ H: _ / _ || _ / _ |- _ ] =>
     first [ apply IHHP in H | apply IHHP1 in H ];
