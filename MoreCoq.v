@@ -537,8 +537,7 @@ Qed.
 (** Give a careful informal proof of [beq_nat_true], being as explicit
     as possible about quantifiers. *)
 
-(*SKIPPED*)
-(** [] *)
+(* [] SKIPPED*)
 
 
 (** The strategy of doing fewer [intros] before an [induction] doesn't
@@ -724,8 +723,8 @@ Qed.
       [n], if [length l = n] then [index n l = None].
 
      _Proof_:
-     SKIPPED
-[]
+
+[] SKIPPED
 *)
 
 (** **** Exercise: 3 stars, optional (gen_dep_practice_more) *)
@@ -1092,9 +1091,8 @@ Qed.
    Theorem: For any [nat]s [n] [m], [beq_nat n m = beq_nat m n].
 
    Proof:
-   SKIPPED
-[]
- *)
+
+[] SKIPPED *)
 
 (** **** Exercise: 3 stars, optional (beq_nat_trans) *)
 Theorem beq_nat_trans : forall n m p,

@@ -2191,6 +2191,8 @@ Qed.
     since it can be desugared into a CWhile, which is the approach I've taken
     here. *)
 
+Section For.
+
 Definition CFor (i : com) (t : bexp) (s c : com) := i ;; WHILE t DO c ;; s END.
 
 Notation "'FOR' ( i ';' t ';' s ) 'DO' c 'END'" :=
@@ -2237,5 +2239,7 @@ Proof.
 
   apply E_WhileEnd. auto.
 Qed.
+
+End For.
 
 (* <$Date: 2014-02-22 09:43:41 -0500 (Sat, 22 Feb 2014) $ *)
