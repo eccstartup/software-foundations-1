@@ -20,9 +20,9 @@ Current progress:
 - [X] MoreInd:       More on Induction
 - [X] Review1:       Review Session for First Midterm
 - [X] SfLib:         Software Foundations Library
-- [ ] Imp:           Simple Imperative Programs
+- [X] Imp:           Simple Imperative Programs
 - [X] ImpParser:     Lexing and Parsing in Coq
-- [ ] ImpCEvalFun:   Evaluation Function for Imp
+- [X] ImpCEvalFun:   Evaluation Function for Imp
 - [X] Extraction:    Extracting ML from Coq
 - [ ] Equiv:         Program Equivalence
 - [ ] Hoare:         Hoare Logic, Part I

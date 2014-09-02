@@ -1217,8 +1217,178 @@ Qed.
    - Prove that the optimizer is sound.  (This part should be _very_
      easy.)  *)
 
-(* FILL IN HERE *)
-(** [] *)
+Fixpoint optimize_0plus_aexp (e:aexp) : aexp :=
+  match e with
+    | ANum x => ANum x
+    | AId x => AId x
+    | APlus (ANum 0) x0 => optimize_0plus_aexp x0
+    | APlus x x0 =>
+        APlus (optimize_0plus_aexp x) (optimize_0plus_aexp x0)
+    | AMinus x x0 =>
+        AMinus (optimize_0plus_aexp x) (optimize_0plus_aexp x0)
+    | AMult x x0 =>
+        AMult (optimize_0plus_aexp x) (optimize_0plus_aexp x0)
+  end.
+
+Fixpoint optimize_0plus_bexp (e:bexp) : bexp :=
+  match e with
+    | BTrue => BTrue
+    | BFalse => BFalse
+    | BEq x x0 =>
+        BEq (optimize_0plus_aexp x) (optimize_0plus_aexp x0)
+    | BLe x x0 =>
+        BLe (optimize_0plus_aexp x) (optimize_0plus_aexp x0)
+    | BNot x => BNot x
+    | BAnd x x0 => BAnd x x0
+  end.
+
+Fixpoint optimize_0plus_com (c:com) : com :=
+  match c with
+    | CSkip => CSkip
+    | CAss x x0 => CAss x (optimize_0plus_aexp x0)
+    | CSeq x x0 =>
+        CSeq (optimize_0plus_com x) (optimize_0plus_com x0)
+    | CIf x x0 x1 =>
+        CIf (optimize_0plus_bexp x)
+          (optimize_0plus_com x0) (optimize_0plus_com x1)
+    | CWhile x x0 =>
+        CWhile (optimize_0plus_bexp x) (optimize_0plus_com x0)
+  end.
+
+Theorem APlus_congruence : forall a1 a1' a2 a2',
+  aequiv a1 a1' ->
+  aequiv a2 a2' ->
+  aequiv (APlus a1 a2) (APlus a1' a2').
+Proof.
+  intros. unfold aequiv in *. intros.
+  simpl. auto.
+Qed.
+
+Theorem AMinus_congruence : forall a1 a1' a2 a2',
+  aequiv a1 a1' ->
+  aequiv a2 a2' ->
+  aequiv (AMinus a1 a2) (AMinus a1' a2').
+Proof.
+  intros. unfold aequiv in *. intros.
+  simpl. auto.
+Qed.
+
+Theorem AMult_congruence : forall a1 a1' a2 a2',
+  aequiv a1 a1' ->
+  aequiv a2 a2' ->
+  aequiv (AMult a1 a2) (AMult a1' a2').
+Proof.
+  intros. unfold aequiv in *. intros.
+  simpl. auto.
+Qed.
+
+Theorem optimize_0plus_aexp_sound : atrans_sound optimize_0plus_aexp.
+Proof.
+  unfold atrans_sound. intros.
+  aexp_cases (induction a) Case.
+  Case "ANum". unfold aequiv. auto.
+  Case "AId". unfold aequiv. auto.
+  Case "APlus".
+    simpl (optimize_0plus_aexp (APlus a1 a2)).
+    destruct a1; try apply APlus_congruence; simpl; auto.
+    destruct n; simpl; auto.
+    apply APlus_congruence; auto.
+  Case "AMinus".
+    simpl (optimize_0plus_aexp (AMinus a1 a2)).
+    destruct a1; try apply AMinus_congruence; simpl; auto.
+  Case "AMult".
+    simpl (optimize_0plus_aexp (AMult a1 a2)).
+    destruct a1; try apply AMult_congruence; simpl; auto.
+Qed.
+
+Theorem optimize_0plus_bexp_sound : btrans_sound optimize_0plus_bexp.
+Proof.
+  unfold btrans_sound. intros.
+  unfold bequiv.
+  bexp_cases (induction b) Case; simpl; auto; intros;
+  replace (aeval st (optimize_0plus_aexp a)) with (aeval st a);
+  replace (aeval st (optimize_0plus_aexp a0)) with (aeval st a0);
+  auto; apply optimize_0plus_aexp_sound.
+Qed.
+
+Theorem optimize_0plus_com_sound : ctrans_sound optimize_0plus_com.
+Proof.
+  unfold ctrans_sound. intros.
+  unfold cequiv.
+
+  com_cases (induction c) Case; simpl; auto; intros.
+  Case "SKIP". split; auto.
+  Case "::=".
+    remember (optimize_0plus_aexp a) as a1' eqn:Heqa1'.
+    assert (aequiv a a1') by (subst; apply optimize_0plus_aexp_sound).
+    apply (CAss_congruence i a a1'); assumption.
+
+  Case ";;".
+    split; intros;
+    inversion H; subst;
+    apply IHc1 in H2;
+    apply IHc2 in H5;
+    apply E_Seq with st'0; assumption.
+
+  Case "IFB".
+    split; intros;
+    inversion H; subst;
+    assert (bequiv b (optimize_0plus_bexp b))
+      by (subst; apply optimize_0plus_bexp_sound);
+    unfold bequiv in H0;
+    first
+      [ apply E_IfTrue;
+          [ apply IHc1 in H6;
+            first [ rewrite H0 | rewrite <- H0 ]; assumption
+          | apply IHc1; assumption ]
+      | apply E_IfFalse;
+          [ apply IHc2 in H6;
+            first [ rewrite H0 | rewrite <- H0 ]; assumption
+          | apply IHc2; assumption ]
+      ].
+
+  Case "WHILE".
+    split; intros;
+    inversion H; subst;
+    assert (bequiv b (optimize_0plus_bexp b))
+      by (subst; apply optimize_0plus_bexp_sound);
+    first
+      [ apply E_WhileEnd;
+        first [ rewrite H0 | rewrite <- H0 ]; assumption
+
+      | apply E_WhileLoop with st'0;
+          [ SSCase "show loop runs";
+            first [ rewrite H0 | rewrite <- H0 ]; assumption
+          | SSCase "body execution";
+            apply IHc; assumption
+          | SSCase "subsequent loop execution";
+            apply (CWhile_congruence
+                     b (optimize_0plus_bexp b)
+                     c (optimize_0plus_com c));
+              assumption;
+              unfold cequiv; apply IHc; assumption
+          ]
+      ].
+Qed.
+
+Definition optimizer (c:com) : com :=
+  optimize_0plus_com (fold_constants_com c).
+
+Example optimizer_1 :
+  optimizer
+    (X ::= APlus (ANum 0) (ANum 2);;
+     IFB (BEq (APlus (AMinus (ANum 7) (ANum 7)) (AId X)) (AId X))
+     THEN Y ::= ANum 3
+     ELSE Y ::= ANum 4
+     FI) =
+  (X ::= (ANum 2);;
+   IFB (BEq (AId X) (AId X))
+   THEN Y ::= ANum 3
+   ELSE Y ::= ANum 4
+   FI).
+Proof.
+  unfold optimizer. reflexivity.
+Qed.
 
 (* ####################################################### *)
 (** * Proving That Programs Are _Not_ Equivalent *)
