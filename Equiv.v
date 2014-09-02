@@ -1508,13 +1508,37 @@ Lemma aeval_weakening : forall i st a ni,
   var_not_used_in_aexp i a ->
   aeval (update st i ni) a = aeval st a.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. induction H; simpl; auto.
+  unfold update.
+  destruct (eq_id_dec i Y).
+    contradict H. assumption.
+  reflexivity.
+Qed.
 
 (** Using [var_not_used_in_aexp], formalize and prove a correct verson
     of [subst_equiv_property]. *)
 
-(* FILL IN HERE *)
-(** [] *)
+Definition subst_equiv_property' := forall i1 i2 a1 a2,
+  var_not_used_in_aexp i1 a2 ->
+  cequiv (i1 ::= a1;; i2 ::= a2)
+         (i1 ::= a1;; i2 ::= subst_aexp i1 a1 a2).
+
+Theorem subst_inequiv' :
+  subst_equiv_property'.
+Proof.
+  unfold subst_equiv_property'. intros.
+  unfold cequiv. intros.
+  assert (aequiv a2 (subst_aexp i1 a1 a2)).
+    induction H; unfold aequiv; simpl; auto.
+    intros. destruct (eq_id_dec i1 Y).
+      congruence.
+    intuition.
+  apply CSeq_congruence.
+    unfold cequiv. intuition.
+  unfold cequiv.
+  apply CAss_congruence.
+  assumption.
+Qed.
 
 (** **** Exercise: 3 stars, optional (inequiv_exercise) *)
 (** Prove that an infinite loop is not equivalent to [SKIP] *)
