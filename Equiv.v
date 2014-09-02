@@ -1315,8 +1315,7 @@ Theorem optimize_0plus_com_sound : ctrans_sound optimize_0plus_com.
 Proof.
   unfold ctrans_sound. intros.
   unfold cequiv.
-
-  com_cases (induction c) Case; simpl; auto; intros.
+  com_cases (induction c) Case; simpl.
   Case "SKIP". split; auto.
   Case "::=".
     remember (optimize_0plus_aexp a) as a1' eqn:Heqa1'.
@@ -1335,40 +1334,21 @@ Proof.
     inversion H; subst;
     assert (bequiv b (optimize_0plus_bexp b))
       by (subst; apply optimize_0plus_bexp_sound);
-    unfold bequiv in H0;
-    first
-      [ apply E_IfTrue;
-          [ apply IHc1 in H6;
-            first [ rewrite H0 | rewrite <- H0 ]; assumption
-          | apply IHc1; assumption ]
-      | apply E_IfFalse;
-          [ apply IHc2 in H6;
-            first [ rewrite H0 | rewrite <- H0 ]; assumption
-          | apply IHc2; assumption ]
-      ].
+    pose (CIf_congruence b (optimize_0plus_bexp b)
+                         c1 (optimize_0plus_com c1)
+                         c2 (optimize_0plus_com c2));
+    unfold cequiv in c; apply c;
+    assumption; apply IHc; assumption.
 
   Case "WHILE".
     split; intros;
     inversion H; subst;
     assert (bequiv b (optimize_0plus_bexp b))
       by (subst; apply optimize_0plus_bexp_sound);
-    first
-      [ apply E_WhileEnd;
-        first [ rewrite H0 | rewrite <- H0 ]; assumption
-
-      | apply E_WhileLoop with st'0;
-          [ SSCase "show loop runs";
-            first [ rewrite H0 | rewrite <- H0 ]; assumption
-          | SSCase "body execution";
-            apply IHc; assumption
-          | SSCase "subsequent loop execution";
-            apply (CWhile_congruence
-                     b (optimize_0plus_bexp b)
-                     c (optimize_0plus_com c));
-              assumption;
-              unfold cequiv; apply IHc; assumption
-          ]
-      ].
+    pose (CWhile_congruence b (optimize_0plus_bexp b)
+                            c (optimize_0plus_com c));
+    unfold cequiv in c0; apply c0;
+    assumption; apply IHc; assumption.
 Qed.
 
 Definition optimizer (c:com) : com :=
@@ -1386,9 +1366,7 @@ Example optimizer_1 :
    THEN Y ::= ANum 3
    ELSE Y ::= ANum 4
    FI).
-Proof.
-  unfold optimizer. reflexivity.
-Qed.
+Proof. unfold optimizer. reflexivity. Qed.
 
 (* ####################################################### *)
 (** * Proving That Programs Are _Not_ Equivalent *)
