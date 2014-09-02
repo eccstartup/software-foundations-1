@@ -23,15 +23,28 @@ Current progress:
 - [X] Imp:           Simple Imperative Programs
 - [X] ImpParser:     Lexing and Parsing in Coq
 - [X] ImpCEvalFun:   Evaluation Function for Imp
-- [X] Extraction:    Extracting ML from Coq
+- [ ] Extraction:    Extracting ML from Coq
 - [ ] Equiv:         Program Equivalence
+- [ ] Rel:           Binary relations
 - [ ] Hoare:         Hoare Logic, Part I
 - [ ] Hoare2:        Hoare Logic, Part II
+- [ ] HoareAsLogic:  Hoare as Logic
 - [ ] Smallstep:     Small-step Operational Semantics
+- [ ] References:    Typing Mutable References
 - [X] Review2:       Review Session for Second Midterm
 - [X] Auto:          More Automation
+- [ ] UseAuto:       More Automation
+- [ ] LibTactics:    Tactics Library
+- [ ] UseTactics:    More Automation
 - [ ] Types:         Type Systems
+- [ ] Typechecking:  Type Checking
+- [ ] Symbols:       Symbols
 - [ ] Stlc:          The Simply Typed Lambda-Calculus
 - [ ] StlcProp:      Properties of STLC
 - [ ] MoreStlc:      More on the Simply Typed Lambda-Calculus
+- [ ] Records:       Adding Records to STLC
 - [ ] Sub:           Subtyping
+- [ ] RecordSub:     Subtyping with Records
+- [ ] Norm:          Normalization
+- [ ] PE:            Partial Evaluations
+- [ ] Postscript:    Postscript

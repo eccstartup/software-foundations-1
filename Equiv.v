@@ -1523,8 +1523,7 @@ Definition subst_equiv_property' := forall i1 i2 a1 a2,
   cequiv (i1 ::= a1;; i2 ::= a2)
          (i1 ::= a1;; i2 ::= subst_aexp i1 a1 a2).
 
-Theorem subst_inequiv' :
-  subst_equiv_property'.
+Theorem subst_inequiv' : subst_equiv_property'.
 Proof.
   unfold subst_equiv_property'. intros.
   unfold cequiv. intros.
@@ -1546,8 +1545,16 @@ Qed.
 Theorem inequiv_exercise:
   ~ cequiv (WHILE BTrue DO SKIP END) SKIP.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+  unfold not. intros.
+  unfold cequiv in H.
+  pose WHILE_true_nonterm.
+  specialize (n BTrue SKIP).
+  unfold not in n.
+  eapply n. unfold bequiv. auto.
+  apply H. apply E_Skip.
+  Grab Existential Variables.
+  constructor.
+Qed.
 
 (** * Extended exercise: Non-deterministic Imp *)
 

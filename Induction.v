@@ -779,8 +779,7 @@ Proof.
 
 (** Theorem: Addition is commutative.
 
-    Proof: (* FILL IN HERE *)
-[]
+[] SKIPPED
 *)
 
 (** **** Exercise: 2 stars, optional (beq_nat_refl_informal) *)
@@ -790,8 +789,7 @@ Proof.
 
     Theorem: [true = beq_nat n n] for any [n].
 
-    Proof: (* FILL IN HERE *)
-[]
+[] SKIPPED
  *)
 
 (* $Date: 2014-02-19 21:36:35 -0500 (Wed, 19 Feb 2014) $ *)

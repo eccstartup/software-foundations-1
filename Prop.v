@@ -103,8 +103,7 @@ Qed.
 (** Could this proof also be carried out by induction on [n] instead
     of [E]?  If not, why not? *)
 
-(* FILL IN HERE *)
-(** [] *)
+(** [] SKIPPED *)
 
 (** The induction principle for inductively defined propositions does
     not follow quite the same form as that of inductively defined
@@ -126,9 +125,7 @@ Qed.
    Intuitively, we expect the proof to fail because not every
    number is even. However, what exactly causes the proof to fail?
 
-(* FILL IN HERE *)
-*)
-(** [] *)
+(** [] SKIPPED *)
 
 (** **** Exercise: 2 stars (ev_sum) *)
 (** Here's another exercise requiring induction. *)
@@ -224,8 +221,7 @@ Qed.
 (** **** Exercise: 1 star (varieties_of_beauty) *)
 (** How many different ways are there to show that [8] is [beautiful]? *)
 
-(* FILL IN HERE *)
-(** [] *)
+(** [] SKIPPED *)
 
 (** *** *)
 (** In Coq, we can express the definition of [beautiful] as
@@ -355,9 +351,7 @@ Inductive gorgeous : nat -> Prop :=
 (** Write out the definition of [gorgeous] numbers using inference rule
     notation.
 
-(* FILL IN HERE *)
-[]
-*)
+[] SKIPPED *)
 
 
 (** **** Exercise: 1 star (gorgeous_plus13) *)
@@ -481,8 +475,7 @@ Proof.
 (** **** Exercise: 1 star, optional (ev_minus2_n) *)
 (** What happens if we try to use [destruct] on [n] instead of [inversion] on [E]? *)
 
-(* FILL IN HERE *)
-(** [] *)
+(** [] SKIPPED *)
 
 (** *** *)
 (** Another example, in which [inversion] helps narrow down to
@@ -916,8 +909,7 @@ Inductive R : nat -> nat -> nat -> Prop :=
       would the set of provable propositions change?  Briefly (1
       sentence) explain your answer.
 
-(* FILL IN HERE *)
-[]
+[] SKIPPED
 *)
 
 (** **** Exercise: 3 stars, optional (R_fact) *)

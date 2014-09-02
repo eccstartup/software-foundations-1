@@ -611,8 +611,8 @@ Proof.
    _Theorem_: [P] implies [~~P], for any proposition [P].
 
    _Proof_:
-(* FILL IN HERE *)
-   []
+
+[] SKIPPED
 *)
 
 (** **** Exercise: 2 stars (contrapositive) *)
@@ -635,8 +635,7 @@ Qed.
 (** Write an informal proof (in English) of the proposition [forall P
     : Prop, ~(P /\ ~P)]. *)
 
-(* FILL IN HERE *)
-(** [] *)
+(* [] SKIPPED *)
 
 (** *** Constructive logic *)
 (** Note that some theorems that are true in classical logic are _not_
