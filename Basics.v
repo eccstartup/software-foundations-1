@@ -959,7 +959,6 @@ Example test_binn5: binn (binc (Twice (Twice (More Zero)))) =
                     S (binn (Twice (Twice (More Zero)))).
 Proof. simpl. reflexivity.  Qed.
 
-
 (* ###################################################################### *)
 (** * Optional Material *)
 
