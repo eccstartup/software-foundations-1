@@ -661,53 +661,47 @@ Proof.
     if we wish to work in classical logic.  Prove that these five
     propositions are equivalent. *)
 
-Definition peirce := forall P Q: Prop,
-  ((P->Q)->P)->P.
-Definition classic := forall P:Prop,
-  ~~P -> P.
-Definition excluded_middle := forall P:Prop,
-  P \/ ~P.
-Definition de_morgan_not_and_not := forall P Q:Prop,
-  ~(~P /\ ~Q) -> P\/Q.
-Definition implies_to_or := forall P Q:Prop,
-  (P->Q) -> (~P\/Q).
+Definition peirce                := forall P Q: Prop, ((P->Q)->P)->P.
+Definition classic               := forall P :  Prop, ~~P -> P.
+Definition excluded_middle       := forall P :  Prop, P \/ ~P.
+Definition de_morgan_not_and_not := forall P Q: Prop, ~(~P /\ ~Q) -> P\/Q.
+Definition implies_to_or         := forall P Q: Prop, (P->Q) -> (~P\/Q).
 
 Theorem peirce_classic : peirce -> classic.
 Proof.
   compute. intros.
-  specialize (H P False). apply H. intros.
-    apply H. contradiction H0.
+  specialize (H P False).
+  apply H. intros.
+  apply H. contradiction H0.
 Qed.
 
 Theorem classic_excluded_middle : classic -> excluded_middle.
 Proof.
-  compute in *. intros.
-  right. apply (H (P -> False)).
-  intros. contradiction H0. intros.
-Abort.
+  compute. intros.
+  apply H. intros.
+  intuition.
+Qed.
 
 Theorem em_de_morgan : excluded_middle -> de_morgan_not_and_not.
 Proof.
-  intros. compute. compute in H.
-  intros. specialize (H P).
-  inversion H. left. apply H1.
-  left.
-Abort.
+  compute. intros.
+  specialize (H (P \/ Q)).
+  intuition.
+Qed.
 
 Theorem de_morgan_to_or : de_morgan_not_and_not -> implies_to_or.
 Proof.
   compute. intros.
-  specialize (H P Q).
-  right. apply H0.
-Abort.
+  specialize (H (P -> False) Q).
+  intuition.
+Qed.
 
 Theorem to_or_peirce: implies_to_or -> peirce.
 Proof.
   compute. intros.
-  specialize (H P Q).
-  apply H0. intros.
-Abort.
-(** [] *)
+  specialize (H P P).
+  intuition.
+Qed.
 
 (** **** Exercise: 3 stars (excluded_middle_irrefutable) *)
 (** This theorem implies that it is always safe to add a decidability
