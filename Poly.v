@@ -867,7 +867,6 @@ Example test_flat_map1:
   flat_map (fun n => [n;n;n]) [1;5;4]
   = [1; 1; 1; 5; 5; 5; 4; 4; 4].
 Proof. reflexivity.  Qed.
-(** [] *)
 
 (** Lists are not the only inductive type that we can write a
     [map] function for.  Here is the definition of [map] for the

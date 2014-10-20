@@ -123,7 +123,7 @@ Qed.
          Case "S".
            ...
    Intuitively, we expect the proof to fail because not every
-   number is even. However, what exactly causes the proof to fail?
+   number is even. However, what exactly causes the proof to fail? *)
 
 (** [] SKIPPED *)
 
@@ -898,18 +898,20 @@ Inductive R : nat -> nat -> nat -> Prop :=
    | c5 : forall m n o, R m n o -> R n m o.
 
 (** - Which of the following propositions are provable?
-      - [R 1 1 2]
+      - [R 1 1 2]                <-- this one
       - [R 2 2 6]
 
     - If we dropped constructor [c5] from the definition of [R],
       would the set of provable propositions change?  Briefly (1
       sentence) explain your answer.
 
+      Yes, as it would remove commutatitivy from the relation.
+
     - If we dropped constructor [c4] from the definition of [R],
       would the set of provable propositions change?  Briefly (1
       sentence) explain your answer.
 
-[] SKIPPED
+      No, because it could be encoded as a separate lemma.
 *)
 
 (** **** Exercise: 3 stars, optional (R_fact) *)
@@ -917,10 +919,46 @@ Inductive R : nat -> nat -> nat -> Prop :=
     theorems that formally connects the relation and the function.
     That is, if [R m n o] is true, what can we say about [m],
     [n], and [o], and vice versa?
+
+    ANSWER: R encodes the addition relation between natural numbers.
 *)
 
-(* FILL IN HERE *)
-(** [] *)
+Lemma R_fact : forall n m o, R n m o -> n + m = o.
+Proof.
+  intros.
+  induction H.
+  - reflexivity.
+  - rewrite <- IHR. reflexivity.
+  - rewrite <- IHR. rewrite plus_n_Sm. reflexivity.
+  - simpl in IHR. rewrite <- plus_n_Sm in IHR.
+    congruence.
+  - rewrite plus_comm. assumption.
+Qed.
+
+Lemma R_fact_r : forall n m o, n + m = o -> R n m o.
+Proof.
+  intros.
+  generalize dependent m.
+  generalize dependent o.
+  induction n; intros;
+  generalize dependent o;
+  induction m;
+  destruct o; intros.
+  - constructor.
+  - inversion H.
+  - inversion H.
+  - apply c3. apply IHm. auto.
+  - rewrite plus_0_r in H.
+    rewrite H. constructor.
+  - apply c2. apply IHn. auto.
+  - inversion H.
+  - apply c2.
+    apply IHn.
+    rewrite <- plus_n_Sm.
+    rewrite <- plus_n_Sm in H.
+    simpl in H.
+    congruence.
+Qed.
 
 End R.
 

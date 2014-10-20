@@ -261,7 +261,6 @@ Example test_andb33:                 (andb3 true false true) = false.
 Proof. reflexivity. Qed.
 Example test_andb34:                 (andb3 true true false) = false.
 Proof. reflexivity. Qed.
-(** [] *)
 
 (* ###################################################################### *)
 (** ** Function Types *)
