@@ -650,23 +650,13 @@ Proof.
   Case "n = S n'".
   simpl. rewrite binary_commute. rewrite <- IHn'. reflexivity.  Qed.
 
-Fixpoint normalize (b : bin) : bin :=
-  match b with
-    | Zero     => Zero
-    | Twice b' => nbin (binn (Twice b'))
-    | More b'  => nbin (binn (More b'))
-  end.
+Definition normalize (b : bin) : bin := nbin (binn b).
 
 Example normalization_needed: normalize (Zero) = normalize (Twice Zero).
 Proof. reflexivity.  Qed.
 
 Theorem norm_conv : forall (b : bin), normalize b = nbin (binn b).
-Proof.
-  intros b. induction b as [| b' | b''].
-  Case "b = Zero". reflexivity.
-  Case "b = Twice b'". reflexivity.
-  Case "b = More b''". reflexivity.
-Qed.
+Proof. reflexivity. Qed.
 
 
 (* ###################################################################### *)
