@@ -905,7 +905,8 @@ Inductive R : nat -> nat -> nat -> Prop :=
       would the set of provable propositions change?  Briefly (1
       sentence) explain your answer.
 
-      Yes, as it would remove commutatitivy from the relation.
+      I had thought this would remove commutatitivy from the relation, but
+      TorosFanny submitted the proofs to follow to show that nothing changes.
 
     - If we dropped constructor [c4] from the definition of [R],
       would the set of provable propositions change?  Briefly (1
@@ -913,6 +914,38 @@ Inductive R : nat -> nat -> nat -> Prop :=
 
       No, because it could be encoded as a separate lemma.
 *)
+
+(* These two proofs by TorosFanny on GitHub. *)
+Inductive P : nat -> nat -> nat -> Prop :=
+  | d1 : P 0 0 0
+  | d2 : forall m n o, P m n o -> P (S m) n (S o)
+  | d3 : forall m n o, P m n o -> P m (S n) (S o)
+  | d4 : forall m n o, P (S m) (S n) (S (S o)) -> P m n o.
+
+Theorem P_comm : forall (m n o : nat), P m n o -> P n m o.
+Proof.
+  apply (P_ind (fun m n o : nat => P n m o)).
+  Case "0". apply d1.
+  Case "1". intros. apply (d3 n m o H0).
+  Case "2". intros. apply (d2 n m o H0).
+  Case "reduce". intros. apply (d4 n m o H0).
+Qed.
+
+Theorem P_is_R : forall (m n o : nat), R m n o <-> P m n o.
+Proof.
+  unfold iff.
+  split.
+    apply (R_ind P).
+    Case "0". exact d1.
+    Case "1". intros. apply (d2 m0 n0 o0 H0).
+    Case "2". intros. apply (d3 m0 n0 o0 H0).
+    Case "r". intros. apply (d4 m0 n0 o0 H0).
+  Case "com". intros. apply (P_comm m0 n0 o0 H0). apply (P_ind R).
+  Case "0". apply c1.
+  Case "1". intros. apply (c2 m0 n0 o0 H0).
+  Case "2". intros. apply (c3 m0 n0 o0 H0).
+  Case "3". intros. apply (c4 m0 n0 o0 H0).
+Qed.
 
 (** **** Exercise: 3 stars, optional (R_fact) *)
 (** Relation [R] actually encodes a familiar function.  State and prove two

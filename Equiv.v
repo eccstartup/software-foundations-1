@@ -3,6 +3,7 @@
 
 
 Require Export Imp.
+Require Export Bool.
 
 (** *** Some general advice for working on exercises:
 
