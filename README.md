@@ -3,6 +3,10 @@
 These files contain my solutions to the exercises found in the [Software
 Foundations](http://www.cis.upenn.edu/~bcpierce/sf)  online course.
 
+# Warning
+
+Please do not copy the solutions if you are doing your homework.
+
 # TODO
 
 Current progress:
